@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>劳动维权帮助助手</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: 'b644c2876d8163c35f230c3e6e0bf83b'
+        }
+    </script>
+    <script src="https://webapi.amap.com/loader.js"></script>
+</head>
+<body>
+    <header class="hero-section">
+        <div class="hero-content">
+            <h1>劳动维权帮助助手</h1>
+            <p class="subtitle">您的法律援助与维权指南</p>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <section id="usage-instructions">
+                <h2>如何寻求法律帮助</h2>
+                <p>本页面旨在为您提供便捷的法律援助信息查询服务。您可以通过以下方式获取帮助：</p>
+                <ul>
+                    <li><strong>查找法律援助中心：</strong> 选择您所在的省份，或点击“获取我的位置并推荐”，我们将为您展示附近的法律援助中心。</li>
+                    <li><strong>访问咨询网站：</strong> 选择省份后，页面下方会显示该省份的法律援助咨询网站链接，您可以点击访问获取在线帮助。</li>
+                    <li><strong>联系检察院：</strong> 如果您需要向检察院反映问题或寻求帮助，可以访问 <a href="https://www.12309.gov.cn/" target="_blank">12309中国检察网</a> 获取相关信息。</li>
+                    <li><strong>周边酒店搜索：</strong> 如果您在异地寻求法律帮助，需要临时住宿，可以使用“周边搜索酒店”功能查找附近的酒店。</li>
+                </ul>
+                <p>请注意：本页面提供的信息仅供参考，具体法律问题请咨询专业律师或法律援助机构。</p>
+            </section>
+            <section id="lawyer-info">
+                <h2>律师推荐与咨询</h2>
+                <p>这里将展示律师推荐、咨询服务等相关内容。</p>
+                <div class="card">
+                    <h2>离你最近的法律援助中心</h2>
+                    <div style="margin-bottom: 10px;">
+                        <label for="province-select">选择省份：</label>
+                        <select id="province-select" onchange="filterCentersByProvince()">
+                            <option value="">所有省份</option>
+                        </select>
+                    </div>
+                    <div id="consultation-website" style="margin-bottom: 10px;"></div>
+                    <button onclick="getAndShowNearbyAid()">获取我的位置并推荐</button>
+                    <button onclick="searchNearbyHotels()" style="margin-left: 10px;">周边搜索酒店</button>
+                    <div id="nearby-centers">点击按钮获取</div>
+                    <div id="map-container" style="width: 100%; height: 400px; margin-top: 20px;"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script src="js/data.js"></script>
+    <script>
+        let map = null;
+        let markers = [];
+        let userLocation = null;
+        let userMarker = null; // 新增：用户位置标记
+
+        function showError(error) {
+            console.error('地图或定位失败:', error);
+            document.getElementById('nearby-centers').innerHTML = `<p>地图加载或定位失败，将显示默认列表。请访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 查询。</p>`;
+            displayLegalAidCenters(); // Fallback to static list
+        }
+
+        function clearMarkers() {
+            map.remove(markers);
+            markers = [];
+        }
+
+        // 新增：清除用户位置标记
+        function clearUserMarker() {
+            if (userMarker) {
+                map.remove(userMarker);
+                userMarker = null;
+            }
+        }
+
+        function addMarker(center) {
+            const marker = new AMap.Marker({
+                position: new AMap.LngLat(center.lng, center.lat),
+                title: center.name,
+                map: map
+            });
+
+            const tel = center.phone ? `<br>电话：<a href="tel:${center.phone}">${center.phone}</a>` : '';
+            const amapNavUrl = `https://uri.amap.com/navigation?to=${center.lng},${center.lat},${center.name}&mode=walk&callnative=1`;
+
+            const infoWindowContent = `
+                <div style="padding:10px; font-size:14px;">
+                    <strong>${center.name}</strong><br>
+                    地址：${center.address}${tel}<br>
+                    <a href="${amapNavUrl}" target="_blank" style="color:#007bff;">高德地图导航</a>
+                </div>`;
+
+            const infoWindow = new AMap.InfoWindow({
+                content: infoWindowContent,
+                offset: new AMap.Pixel(0, -30)
+            });
+
+            marker.on('click', () => {
+                infoWindow.open(map, marker.getPosition());
+            });
+
+            markers.push(marker);
+        }
+
+        function populateProvinces() {
+            const provinceSelect = document.getElementById('province-select');
+            provinceSelect.innerHTML = ''; // 清空现有选项
+
+            // 添加一个默认的“请选择省份”选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '请选择省份';
+            provinceSelect.appendChild(defaultOption);
+
+            // 从维权数据.provinces中获取所有省份并排序
+            const sortedProvinces = Object.keys(维权数据.provinces).sort((a, b) => {
+                return 维权数据.provinces[a].localeCompare(维权数据.provinces[b], 'zh-CN');
+            });
+
+            sortedProvinces.forEach(code => {
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = 维权数据.provinces[code];
+                provinceSelect.appendChild(option);
+            });
+        }
+
+        function filterCentersByProvince() {
+            const provinceSelect = document.getElementById('province-select');
+            const selectedProvinceCode = provinceSelect.value;
+            displayLegalAidCenters(selectedProvinceCode);
+            displayConsultationWebsite(selectedProvinceCode); // 显示咨询网站
+        }
+
+        function displayLegalAidCenters(filterProvinceCode = '') {
+            if (!window.维权数据 || !window.维权数据.legalAidCenters || Object.keys(window.维权数据.legalAidCenters).length === 0) {
+                document.getElementById('nearby-centers').innerHTML = '<p>未找到法律援助中心数据。请访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 查询。</p>';
+                return;
+            }
+
+            clearMarkers();
+            let filteredCenters = [];
+            if (filterProvinceCode && 维权数据.legalAidCenters[filterProvinceCode]) {
+                filteredCenters = 维权数据.legalAidCenters[filterProvinceCode];
+            } else if (!filterProvinceCode) {
+                // 如果没有选择省份，则显示所有省份的中心
+                for (const code in 维权数据.legalAidCenters) {
+                    filteredCenters = filteredCenters.concat(维权数据.legalAidCenters[code]);
+                }
+            }
+
+            let html = '<ul style="list-style:none; padding:0;">';
+            if (filteredCenters.length === 0) {
+                html += '<p>当前省份未找到法律援助中心。</p>';
+            } else {
+                filteredCenters.forEach(center => {
+                    addMarker(center);
+                    const tel = center.phone ? `<br>电话：<a href="tel:${center.phone}">${center.phone}</a>` : '';
+                    const amapNavUrl = `https://uri.amap.com/navigation?to=${center.lng},${center.lat},${center.name}&mode=walk&callnative=1`;
+
+                    html += `
+                        <li style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:8px;">
+                            <strong>${center.name}</strong><br>
+                            地址：${center.address}${tel}<br>
+                            <a href="#" onclick="map.setCenter([${center.lng}, ${center.lat}]); map.setZoom(15); return false;" style="color:#28a745;">在地图上查看</a>
+                            | <a href="${amapNavUrl}" target="_blank" style="color:#007bff;">高德地图导航</a>
+                        </li>`;
+                });
+                if (map) {
+                    map.setFitView();
+                }
+            }
+            html += '</ul>';
+            html += '<p style="text-align:center; margin-top:20px;">您也可以访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 进行更全面的查询。</p>';
+            document.getElementById('nearby-centers').innerHTML = html;
+        }
+
+        // 新增：显示咨询网站
+        function displayConsultationWebsite(provinceCode) {
+            const websiteDiv = document.getElementById('consultation-website');
+            if (websiteDiv) {
+                if (provinceCode && 维权数据.consultationWebsites[provinceCode]) {
+                    const site = 维权数据.consultationWebsites[provinceCode];
+                    websiteDiv.innerHTML = `<p><strong>${维权数据.provinces[provinceCode]}法律援助咨询网站：</strong> <a href="${site.url}" target="_blank">${site.name}</a></p>`;
+                } else {
+                    websiteDiv.innerHTML = ''; // 清空
+                }
+            }
+        }
+
+        function initMap() {
+            AMapLoader.load({
+                key: '2bebdb0b3275d92dc2bd9d8dde2eb4c8',
+                version: '2.0',
+                plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.Geolocation', 'AMap.PlaceSearch', 'AMap.CitySearch']
+            }).then((AMap) => {
+                map = new AMap.Map('map-container', {
+                    zoom: 5,
+                    center: [116.397428, 39.90923] // Default center
+                });
+                map.addControl(new AMap.Scale());
+                map.addControl(new AMap.ToolBar());
+
+                // Initial display
+                populateProvinces();
+                // 默认不显示任何法律援助中心，等待用户选择省份或点击定位
+                // displayLegalAidCenters();
+                displayConsultationWebsite(''); // 初始不显示咨询网站
+
+            }).catch(e => {
+                console.error(e);
+                showError(e);
+            });
+        }
+
+        // 新增：搜索附近酒店的函数
+        function searchNearbyHotels() {
+            if (!userLocation) {
+                alert('请先点击“获取我的位置并推荐”以获取您的位置。');
+                return;
+            }
+
+            document.getElementById('nearby-centers').innerHTML = '<p>正在搜索附近的酒店...</p>';
+
+            const placeSearch = new AMap.PlaceSearch({
+                pageSize: 10,
+                pageIndex: 1,
+                city: '全国', // 可以在这里指定城市，或者根据userLocation的城市信息
+                map: map,
+                panel: "nearby-centers",
+                autoFitView: true
+            });
+
+            placeSearch.searchNearBy('酒店', userLocation, 10000, (status, result) => {
+                if (status === 'complete' && result.info === 'OK') {
+                    const panelElement = document.getElementById('nearby-centers');
+                    const header = document.createElement('p');
+                    header.innerHTML = `<strong>以下是您附近 10 公里内的酒店：</strong>`;
+                    panelElement.insertBefore(header, panelElement.firstChild);
+
+                    const footer = document.createElement('p');
+                    footer.style.textAlign = 'center';
+                    footer.style.marginTop = '20px';
+                    footer.innerHTML = `数据来源于高德地图。`;
+                    panelElement.appendChild(footer);
+                } else {
+                    document.getElementById('nearby-centers').innerHTML = `<p>搜索酒店失败：${result.info || '未知错误'}</p>`;
+                    console.error('搜索酒店失败:', result);
+                }
+            });
+        }
+
+        // 计算距离函数
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // 地球半径 km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return (R * c).toFixed(1);
+        }
+
+        function getAndShowNearbyAid() {
+            document.getElementById('nearby-centers').innerHTML = '<p>正在获取您的位置并搜索附近的法律援助中心...</p>';
+            if (!map) {
+                showError('地图未初始化');
+                return;
+            }
+
+            const geolocation = new AMap.Geolocation({
+                enableHighAccuracy: true,
+                timeout: 20000,
+                zoomToAccuracy: true,
+                showButton: false,
+                showMarker: false, // 将此设置为 false，我们将手动添加标记
+            });
+
+            map.add(geolocation);
+            geolocation.getCurrentPosition((status, result) => {
+                if (status === 'complete') {
+                    userLocation = result.position;
+                    map.setCenter(userLocation);
+                    clearUserMarker(); // 清除旧的用户标记
+                    userMarker = new AMap.Marker({ // 添加新的用户标记
+                        position: userLocation,
+                        map: map,
+                        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_bs.png', // 可以自定义图标
+                        title: '我的位置'
+                    });
+
+                    // 获取到用户位置后，根据距离排序并显示法律援助中心
+                    let allCenters = [];
+                    for (const provCode in 维权数据.legalAidCenters) {
+                        if (维权数据.legalAidCenters.hasOwnProperty(provCode)) {
+                            allCenters = allCenters.concat(维权数据.legalAidCenters[provCode]);
+                        }
+                    }
+
+                    allCenters.forEach(center => {
+                        center.distance = getDistance(userLocation.lat, userLocation.lng, center.lat, center.lng);
+                    });
+
+                    allCenters.sort((a, b) => a.distance - b.distance);
+
+                    // 仅显示最近的法律援助中心，并更新列表和地图标记
+                    displayLegalAidCentersWithDistance(allCenters.slice(0, 10)); // 显示最近的10个
+
+                } else {
+                    showError(result);
+                }
+            });
+        }
+
+        // 新增：显示带有距离信息的法律援助中心
+        function displayLegalAidCentersWithDistance(centers) {
+            clearMarkers();
+            let html = '<ul style="list-style:none; padding:0;">';
+            if (centers.length === 0) {
+                html += '<p>附近未找到法律援助中心。</p>';
+            } else {
+                centers.forEach(center => {
+                    addMarker(center);
+                    const tel = center.phone ? `<br>电话：<a href="tel:${center.phone}">${center.phone}</a>` : '';
+                    const amapNavUrl = `https://uri.amap.com/navigation?to=${center.lng},${center.lat},${center.name}&mode=walk&callnative=1`;
+
+                    html += `
+                        <li style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:8px;">
+                            <strong>${center.name}</strong><br>
+                            地址：${center.address}${tel}<br>
+                            距离约 ${center.distance} 公里<br>
+                            <a href="#" onclick="map.setCenter([${center.lng}, ${center.lat}]); map.setZoom(15); return false;" style="color:#28a745;">在地图上查看</a>
+                            | <a href="${amapNavUrl}" target="_blank" style="color:#007bff;">高德地图导航</a>
+                        </li>`;
+                });
+                if (map) {
+                    map.setFitView();
+                }
+            }
+            html += '</ul>';
+            html += '<p style="text-align:center; margin-top:20px;">您也可以访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 进行更全面的查询。</p>';
+            document.getElementById('nearby-centers').innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+        });
+    </script>
+    <footer>
+        <p>&copy; 2026 劳动维权帮助助手</p>
+    </footer>
+</body>
+</html>

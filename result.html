@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>维权指引 - 维权助手</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+     
+    <style>
+        /* 你的原有 style 保持不变，这里只补充必要部分 */
+        .phone-container { margin-top: 16px; }
+        .phone-item { 
+            padding: 12px 0; 
+            border-bottom: 1px solid #eee; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .copy-btn {
+            background-color: transparent;
+            color: #4a90e2; /* 主题蓝色 */
+            border: 1px solid #4a90e2;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            flex-shrink: 0; /* 防止按钮被压缩 */
+        }
+        .copy-btn:hover {
+            background-color: #4a90e2;
+            color: white;
+        }
+        .phone-link { 
+            color: #4a90e2; /* 主题蓝色 */
+            font-weight: bold; 
+            text-decoration: none; 
+            flex: 1; 
+        }
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: 600;
+            color: #2c5282; /* 与标题颜色保持一致 */
+        }
+        .province-search-input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 2px solid #a7c7ed; /* 柔和的蓝色边框 */
+            border-radius: 12px;
+            font-size: 1.05rem;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .province-search-input:focus {
+            outline: none;
+            border-color: #4a90e2; /* 聚焦时主题蓝色 */
+            box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+        }
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1.05rem;
+            border: 2px solid #a7c7ed; /* 柔和的蓝色边框 */
+            border-radius: 12px;
+            background: white;
+            appearance: none; /* 移除默认样式 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a90e2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.6c-5%200-9.3%201.8-13.2%206.4-3.9%204.5-6%2010.2-6%2016.3%200%206.1%202.1%2011.8%206%2016.3l118.2%20118.2c4.5%204.5%2010.2%206.4%2016.3%206.4s11.8-1.9%2016.3-6.4l118.2-118.2c3.9-4.5%206-10.2%206-16.3s-2.1-11.8-6-16.3z%22%2F%3E%3C%2Fsvg%3E'); /* 自定义下拉箭头，颜色与主题一致 */
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 12px;
+        }
+        select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+        }
+        /* 其他样式，例如 .card, .action-btn, .warning-card 等，保持原有或根据需要调整 */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4f8 0%, #e0e7ed 100%); /* 柔和的浅蓝色渐变 */
+            min-height: 100vh;
+            color: #333333; /* 深灰色文本 */
+            line-height: 1.7;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 16px; /* 增加顶部填充以避免与返回按钮重叠 */
+            position: relative;
+        }
+         .back-button {
+             position: absolute;
+             left: 16px;
+             top: 10px; /* 调整位置，使其在增加的顶部填充内 */
+             font-size: 1.6rem;
+             color: #4a90e2; /* 统一为主题蓝色 */
+             text-decoration: none;
+         }
+         h1 {
+             font-size: 1.95rem;
+             font-weight: 800;
+             color: #2c5282; /* 深一点的主题蓝色 */
+             margin: 0;
+         }
+        main {
+            margin: 20px 0 40px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            font-size: 1.3rem;
+            color: #2c5282; /* 与主标题保持一致的深蓝色 */
+            margin-bottom: 12px;
+            border-bottom: 2px solid #a7c7ed; /* 柔和的蓝色下划线 */
+            padding-bottom: 8px;
+        }
+        .card ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        .card li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        details {
+            margin-bottom: 10px;
+        }
+        details summary {
+            font-weight: bold;
+            color: #4a90e2; /* 与主题蓝色保持一致 */
+            cursor: pointer;
+            list-style: none; /* 隐藏默认箭头 */
+        }
+        details summary::-webkit-details-marker {
+            display: none; /* 隐藏 Chrome/Safari 默认箭头 */
+        }
+        details summary:before {
+            content: '▶'; /* 自定义箭头 */
+            margin-right: 8px;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        details[open] summary:before {
+            content: '▼'; /* 打开时箭头向下 */
+            transform: rotate(90deg);
+        }
+        details p {
+            margin-top: 8px;
+            color: #555;
+            padding-left: 16px;
+        }
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .print-btn {
+            background: linear-gradient(135deg, #4a90e2, #2c5282); /* 主题蓝色渐变 */
+        }
+        .print-btn:hover {
+            background: linear-gradient(135deg, #2c5282, #4a90e2); /* 悬停时反转渐变 */
+        }
+        .copy-all-btn {
+            background: linear-gradient(135deg, #4a90e2, #2c5282); /* 与打印按钮使用相同的主题蓝色渐变 */
+        }
+        .copy-all-btn:hover {
+            background: linear-gradient(135deg, #2c5282, #4a90e2); /* 悬停时反转渐变 */
+        }
+        .warning-card {
+            background: #e6f7ff; /* 柔和的浅蓝色背景 */
+            border: 1px solid #91d5ff; /* 略深的浅蓝色边框 */
+            color: #2c5282; /* 深蓝色文本，与标题保持一致 */
+            padding: 16px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #555; /* 调整为更柔和的深灰色 */
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.6rem; }
+            .problem-card { font-size: 1.15rem; padding: 18px 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-button">← 返回首页</a>
+            <h1 id="result-title">加载中...</h1>
+        </header>
+ 
+        <main id="result-content">
+            <label for="province-select">请选择所在省份（影响本地电话/援助地址）：</label>
+            <input type="text" id="province-search" placeholder="搜索省份..." class="province-search-input">
+            <select id="province-select"></select>
+            <div class="card phone-container">
+                <h2>拨打电话（全国 + 本地）</h2>
+                <div id="phones-list"></div>
+            </div>
+            <!-- 其他卡片：证据、步骤、提醒等 -->
+        </main>
+ 
+        <footer>
+            <!-- 你的原有 footer -->
+            <div class="warning-card">
+                <strong>农民工欠薪首选：</strong><br>
+                微信搜索“国务院客户端”小程序 → “根治欠薪”专栏提交线索<br>
+                （全国统一、人社部督办，效率最高）
+            </div>
+            <p>紧急拨打：<strong>12348</strong>（法律服务） / <strong>12333</strong>（人社热线） / <strong>110</strong>（诈骗报警）</p>
+            <p>本工具仅整理公开信息，不构成法律意见。</p>
+        </footer>
+    </div>
+ 
+    <script src="js/data.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type');
+        const problemKey = params.get('problem');
+ 
+        if (!type || !problemKey || !维权数据.identities[type] || !维权数据.identities[type].problems[problemKey]) {
+            document.getElementById('result-content').innerHTML = '<p style="text-align:center;color:red;padding:40px;">参数错误，请返回首页重试</p>';
+        } else {
+            let userLatitude = null;
+            let userLongitude = null;
+
+
+
+            const identity = 维权数据.identities[type];
+            const problem = identity.problems[problemKey];
+    
+            document.getElementById('result-title').textContent = `${identity.label} - ${problem.title}`;
+    
+            const select = document.getElementById('province-select');
+            const searchInput = document.getElementById('province-search');
+            const phonesList = document.getElementById('phones-list'); // 将 phonesList 的定义提前
+    
+            function populateProvinceSelect(searchTerm = '') {
+                console.log('populateProvinceSelect called with searchTerm:', searchTerm);
+                let htmlOptions = '<option value="00">全国通用（推荐）</option>';
+                const filteredProvinces = Object.entries(维权数据.provinces)
+                    .filter(([code, prov]) => code === '00' || prov.name.includes(searchTerm))
+                    .sort(([, a], [, b]) => {
+                        if (a.name === '全国通用') return -1;
+                        if (b.name === '全国通用') return 1;
+                        return a.name.localeCompare(b.name, 'zh-CN');
+                    });
+    
+                filteredProvinces.forEach(([code, prov]) => {
+                    if (code !== '00') {
+                        htmlOptions += `<option value="${code}">${prov.name}</option>`;
+                    }
+                });
+                select.innerHTML = htmlOptions;
+                select.value = localStorage.getItem('lastProvince') || '00';
+                renderPhones(); // Call renderPhones after updating the select
+            }
+    
+            populateProvinceSelect(); // Initial population
+    
+            searchInput.addEventListener('input', (event) => {
+                console.log('searchInput input event triggered. Value:', event.target.value);
+                populateProvinceSelect(event.target.value);
+            });
+    
+            // 渲染核心内容（证据、步骤、提醒）
+            let coreHtml = '';
+            
+            // 证据部分
+            coreHtml += '<div class="card"><h2>1. 收集证据</h2>';
+            problem.evidence.forEach(item => {
+                coreHtml += `
+                    <details>
+                        <summary>${item.name}</summary>
+                        <p>${item.tip}</p>
+                    </details>`;
+            });
+            coreHtml += '</div>';
+    
+            // 后续行动
+            if (problem.next_steps && problem.next_steps.length > 0) {
+                coreHtml += '<div class="card"><h2>2. 后续行动建议</h2><ul>';
+                problem.next_steps.forEach(step => {
+                    coreHtml += `<li>${step}</li>`;
+                });
+                coreHtml += '</ul></div>';
+            }
+    
+            // 重要提醒
+            if (problem.important_tips && problem.important_tips.length > 0) {
+                coreHtml += '<div class="card"><h2>3. 重要提醒</h2><ul>';
+                problem.important_tips.forEach(tip => {
+                    coreHtml += `<li>${tip}</li>`;
+                });
+                coreHtml += '</ul></div>';
+            }
+    
+            document.getElementById('result-content').insertAdjacentHTML('beforeend', coreHtml);
+    
+
+    
+            // 电话实时更新
+            function renderPhones() {
+                const code = select.value;
+                const prov = 维权数据.provinces[code] || 维权数据.provinces['00'];
+                let pHtml = '';
+
+                const normalizePhone = (phoneStr) => phoneStr.replace(/\D/g, '');
+
+                const commonPhonesSet = new Set(problem.common_phones.map(p => normalizePhone(p)));
+
+                problem.common_phones.forEach(str => {
+                    const num = normalizePhone(str);
+                    pHtml += `
+                        <div class="phone-item">
+                            <a href="tel:${num}" class="phone-link">📞 ${str}</a>
+                            ${num ? `<button class="copy-btn" onclick="copyToClip('${num}')">复制</button>` : ''}
+                        </div>`;
+                });
+
+                Object.entries(prov.phones || {}).forEach(([name, desc]) => {
+                    const num = normalizePhone(desc);
+                    if (num && !commonPhonesSet.has(num)) {
+                        pHtml += `
+                            <div class="phone-item">
+                                <a href="tel:${num}" class="phone-link">📞 ${name}: ${desc}</a>
+                                ${num ? `<button class="copy-btn" onclick="copyToClip('${num}')">复制</button>` : ''}
+                            </div>`;
+                    }
+                });
+                phonesList.innerHTML = pHtml;
+            }
+    
+            // 初始渲染电话
+            renderPhones();
+    
+            // 省份切换更新电话
+            select.addEventListener('change', () => {
+                console.log('select change event triggered. New value:', select.value);
+                localStorage.setItem('lastProvince', select.value);
+                renderPhones(); // 只更新电话部分，不刷新页面
+            });
+    
+            // 复制到剪贴板函数
+            function copyToClip(text) {
+                navigator.clipboard.writeText(text)
+                    .then(() => alert('已复制电话号码'))
+                    .catch(err => console.error('复制失败:', err));
+            }
+    
+            // 添加打印和复制全部按钮
+            document.getElementById('result-content').insertAdjacentHTML('beforeend', `
+                <a href="print.html?type=${type}&problem=${problemKey}" class="action-btn print-btn" target="_blank">
+                    一键打印证据清单
+                </a>
+                <button class="action-btn copy-all-btn" onclick="copyAll()">
+                    复制全部内容分享
+                </button>
+            `);
+    
+            // 复制全部内容函数
+            function copyAll() {
+                const text = document.getElementById('result-content').innerText;
+                navigator.clipboard.writeText(text)
+                    .then(() => alert('已复制全部内容，可发给朋友/律师'))
+                    .catch(() => alert('复制失败，请手动复制'));
+            }
+
+
+
+
+
+
+
+
+        }
+    </script>
+ 
+</body>
+</html>

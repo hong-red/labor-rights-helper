@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维权材料清单 - 请打印带走</title>
+    
+    <style>
+        body {
+            font-family: "SimSun", "宋体", system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background: #fff;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 210mm;  /* A4宽度 */
+            margin: 0 auto;
+            padding: 20mm 15mm;
+        }
+        h1 {
+            font-size: 24pt;
+            text-align: center;
+            margin: 0 0 10mm;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5mm;
+        }
+        .info-box {
+            margin: 10mm 0;
+            padding: 8mm;
+            border: 1px solid #000;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            font-size: 14pt;
+            margin: 0 0 5mm;
+        }
+        .info-box p {
+            margin: 3mm 0;
+            font-size: 12pt;
+        }
+        .check-item {
+            margin: 5mm 0;
+            font-size: 13pt;
+        }
+        .check-item input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 5mm;
+        }
+        .step-list {
+            margin: 10mm 0;
+            padding-left: 0;
+        }
+        .step-list li {
+            margin: 6mm 0;
+            font-size: 13pt;
+            list-style-position: inside;
+        }
+        .hotline {
+            margin-top: 15mm;
+            padding: 10mm;
+            background: #fff3cd;
+            border: 2px solid #ff8c00;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+        }
+        .hotline strong {
+            font-size: 18pt;
+            color: #d32f2f;
+        }
+        .no-print {
+            text-align: center;
+            margin: 20px;
+        }
+        .no-print button {
+            padding: 12px 30px;
+            font-size: 16pt;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media print {
+            body { margin: 10mm; font-size: 12pt; }
+            .no-print, .hotline { display: none !important; }
+            .container { padding: 0; }
+            h1 { page-break-after: avoid; }
+            .info-box { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>维权材料清单</h1>
+        <p style="text-align:center; font-size:12pt; margin-bottom:10mm;">
+            打印日期： <span id="print-date"></span>
+        </p>
+
+        <div class="info-box">
+            <h3>基本信息（请填写）</h3>
+            <p>姓名：____________________　联系电话：____________________</p>
+            <p>纠纷单位/对方：____________________________</p>
+            <p>金额/事项：____________________________　发生时间：________________</p>
+        </div>
+
+        <div id="print-content"></div>
+
+        <div class="hotline">
+            优先拨打：<strong>12348</strong>（免费法律咨询）<br>
+            或 <strong>12333</strong>（劳动监察）<br>
+            农民工欠薪可微信“国务院客户端”小程序提交“根治欠薪”线索
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print()">立即打印（建议A4纸）</button>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || 'nongmingong';
+        const problemKey = urlParams.get('problem') || 'qianxin';
+
+        const identity = 维权数据.identities[type];
+        const problem = identity?.problems?.[problemKey];
+
+        document.getElementById('print-date').textContent = new Date().toLocaleDateString('zh-CN');
+
+        if (!identity || !problem) {
+            document.getElementById('print-content').innerHTML = '<p style="text-align:center; color:red;">参数错误，无法生成清单</p>';
+        } else {
+            let html = `
+                <h2 style="margin-top:15mm;">问题类型：${identity.label} - ${problem.title}</h2>
+
+                <h3>1. 需要准备的证据（请逐项核对）</h3>
+                <ul class="evidence-list" style="padding-left:0;">
+            `;
+
+            problem.evidence.forEach(item => {
+                html += `
+                    <li class="check-item">
+                        <input type="checkbox"> 
+                        <strong>${item.name}</strong>　${item.tip}
+                    </li>
+                `;
+            });
+
+            html += '</ul>';
+
+            if (problem.next_steps && problem.next_steps.length) {
+                html += '<h3>2. 下一步行动建议（按顺序执行）</h3><ol class="step-list">';
+                problem.next_steps.forEach(step => {
+                    html += `<li>${step}</li>`;
+                });
+                html += '</ol>';
+            }
+
+            if (problem.important_tips && problem.important_tips.length) {
+                html += '<h3>3. 重要提醒</h3><ul style="padding-left:20px;">';
+                problem.important_tips.forEach(tip => {
+                    html += `<li>${tip}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            html += `
+                <p style="margin-top:20mm; font-weight:bold; text-align:center;">
+                    请带上身份证原件及以上材料前往当地劳动监察大队或法律援助中心
+                </p>
+            `;
+
+            document.getElementById('print-content').innerHTML = html;
+        }
+
+        // 可选：自动打印（先注释，避免打扰）
+        // setTimeout(() => window.print(), 1000);
+    </script>
+
+</body>
+</html>

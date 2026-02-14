@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>维权助手 - 欠薪被骗怎么办</title>
+    <meta name="description" content="农民工讨薪、大学生兼职被骗、个体商户货款纠纷，一步步教你怎么办">
+    
+    <!-- Font Awesome 图标库（免费版） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4ff 0%, #e3e9ff 100%);
+            min-height: 100vh;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 28px 16px;
+        }
+        header {
+            text-align: center;
+            padding: 52px 0 36px;
+        }
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #1e40af;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            font-size: 1.35rem;
+            color: #1e40af;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 1rem;
+            padding: 6px 18px;
+            border-radius: 999px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 36px 0 52px;
+        }
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 28px 24px;
+            font-size: 1.45rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.2);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(30, 64, 175, 0.3);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .button i {
+            font-size: 1.9rem;
+        }
+        /* 请律师 - 放在第一位，最醒目深蓝 */
+        .lawyer {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            order: -1;
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35);
+        }
+        .gongren { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .getihu  { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+        .daxuesheng { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
+        .other   { background: linear-gradient(135deg, #6b7280, #4b5563); font-size: 1.25rem; }
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #4b5563;
+            padding: 28px 0;
+            border-top: 1px solid #dbeafe;
+        }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 44px;
+            line-height: 1.6;
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 2.4rem; }
+            .button { font-size: 1.35rem; padding: 24px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>维权助手</h1>
+            <div class="subtitle">遇到欠薪、被骗、纠纷？别慌！</div>
+            <div class="tag">一步步教你：找谁、带什么、怎么做</div>
+        </header>
+
+        <main>
+            <!-- 请律师放在最前面，用最深蓝突出 -->
+            <a href="lawyer.html" class="button lawyer">
+                <i class="fas fa-gavel"></i>
+                请律师 / 法律援助
+            </a>
+
+            <a href="problem.html?type=gongren" class="button gongren">
+                <i class="fas fa-hard-hat"></i>
+                我是工人（讨薪 / 工伤 / 加班费）
+            </a>
+
+            <a href="problem.html?type=getihu" class="button getihu">
+                <i class="fas fa-store"></i>
+                我是个体商户（货款拖欠 / 消费纠纷）
+            </a>
+
+            <a href="problem.html?type=daxuesheng" class="button daxuesheng">
+                <i class="fas fa-graduation-cap"></i>
+                我是大学生/兼职生（欠薪 / 中介 / 骗局）
+            </a>
+
+            <a href="tel:12348" class="button other">
+                <i class="fas fa-phone-volume"></i>
+                不确定？直接拨12348咨询
+            </a>
+        </main>
+
+        <footer>
+            <p>本工具仅整理公开信息，不构成法律意见</p>
+            <p class="disclaimer">
+                紧急情况请立即拨打：<br>
+                <strong>12348</strong>（公共法律服务热线）<br>
+                <strong>12333</strong>（劳动保障热线）<br>
+                <strong>12315</strong>（消费/市场监管投诉）<br>
+                <strong>110</strong>（涉嫌诈骗/刑事）
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 首次进入友好提示（可选删除）
+        if (!localStorage.getItem('seen_home')) {
+            setTimeout(() => {
+                alert('本工具收集公开热线和指引，仅供参考。\n实际以12348/12333/12315接听为准。\n祝您顺利维权！');
+                localStorage.setItem('seen_home', '1');
+            }, 800);
+        }
+    </script>
+
+</body>
+</html>

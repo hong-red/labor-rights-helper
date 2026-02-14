@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>选择问题 - 维权助手</title>
+    
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4f8 0%, #e0e7ed 100%); /* 柔和的浅蓝色渐变 */
+            min-height: 100vh;
+            color: #333333; /* 深灰色文本 */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 16px; /* 增加顶部填充以避免与返回按钮重叠 */
+            position: relative;
+        }
+        .back-button {
+            position: absolute;
+            left: 16px;
+            top: 10px; /* 调整位置，使其在增加的顶部填充内 */
+            font-size: 1.6rem; /* 调整字体大小与 result.html 保持一致 */
+            color: #4a90e2; /* 统一为主题蓝色 */
+            text-decoration: none;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c5282; /* 深一点的主题蓝色 */
+            margin-top: 20px;
+        }
+        main {
+            margin: 20px 0 40px;
+        }
+        .problem-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: #333;
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .problem-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .problem-card i {
+            font-size: 1.8rem;
+            color: #4a90e2; /* 统一为主题蓝色 */
+            min-width: 40px;
+        }
+        .identity-title {
+            text-align: center;
+            font-size: 1.4rem;
+            color: #333333; /* 与主体文本颜色保持一致 */
+            margin: 16px 0 24px;
+            font-weight: 600;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #555; /* 调整为更柔和的深灰色 */
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.6rem; }
+            .problem-card { font-size: 1.15rem; padding: 18px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-button">← 返回</a>
+            <h1>选择您遇到的问题</h1>
+        </header>
+
+        <main>
+            <div class="identity-title" id="identity-label">加载中...</div>
+            <div id="problem-list"></div>
+        </main>
+
+        <footer>
+            <p>本工具仅提供公开信息指引，不构成法律意见。</p>
+            <p>情况紧急请立即拨打 <strong>12348</strong> 或 <strong>12333</strong> 或 <strong>110</strong>。</p>
+        </footer>
+    </div>
+
+ <script src="js/data.js"></script>
+ <script>
+     const urlParams = new URLSearchParams(window.location.search);
+     const type = urlParams.get('type');
+ 
+     if (!type || !维权数据.identities[type]) {
+         document.getElementById('problem-list').innerHTML = `
+             <div style="text-align:center; padding:40px; color:red;">
+                 <h3>身份类型错误</h3>
+                 <p>当前参数：type = ${type || '未传'}</p>
+                 <p>支持：gongren / getihu / daxuesheng</p>
+                 <a href="index.html" style="color:#007bff;">← 返回首页重新选择</a>
+             </div>`;
+     } else {
+         const identity = 维权数据.identities[type];
+         document.getElementById('identity-label').textContent = identity.label;
+ 
+         let html = '';
+         for (let key in identity.problems) {
+             const prob = identity.problems[key];
+             html += `
+                 <a href="result.html?type=${type}&problem=${key}" class="problem-card">
+                     <i class="fas fa-question-circle"></i>
+                     <span>${prob.title}</span>
+                 </a>`;
+         }
+         document.getElementById('problem-list').innerHTML = html;
+     }
+ </script>
+
+</body>
+</html>
