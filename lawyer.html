@@ -12,6 +12,72 @@
         }
     </script>
     <script src="https://webapi.amap.com/loader.js"></script>
+    <style>
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            background-color: white;
+            color: #007bff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .page-btn:hover {
+            background-color: #e7f1ff;
+        }
+        .page-btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .page-btn:disabled {
+            background-color: #f0f0f0;
+            color: #666666;
+            border-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #nearby-centers {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        .poi-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .legal-aid-pinned {
+            border-left: 4px solid #ff4d4f;
+            background-color: #fff1f0;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .pinned-tag {
+            background: #ff4d4f;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
     <header class="hero-section">
@@ -45,7 +111,7 @@
                         </select>
                     </div>
                     <div id="consultation-website" style="margin-bottom: 10px;"></div>
-                    <button onclick="getAndShowNearbyAid()">获取我的位置并推荐</button>
+                    <button id="get-location-button" onclick="getAndShowNearbyAid()" disabled>获取我的位置并推荐</button>
                     <button onclick="searchNearbyHotels()" style="margin-left: 10px;">周边搜索酒店</button>
                     <div id="nearby-centers">点击按钮获取</div>
                     <div id="map-container" style="width: 100%; height: 400px; margin-top: 20px;"></div>
@@ -120,65 +186,186 @@
 
             // 从维权数据.provinces中获取所有省份并排序
             const sortedProvinces = Object.keys(维权数据.provinces).sort((a, b) => {
-                return 维权数据.provinces[a].localeCompare(维权数据.provinces[b], 'zh-CN');
+                return 维权数据.provinces[a].name.localeCompare(维权数据.provinces[b].name, 'zh-CN');
             });
 
             sortedProvinces.forEach(code => {
                 const option = document.createElement('option');
                 option.value = code;
-                option.textContent = 维权数据.provinces[code];
+                option.textContent = 维权数据.provinces[code].name;
                 provinceSelect.appendChild(option);
             });
         }
 
-        function filterCentersByProvince() {
+        let currentProvinceSearchPage = 1; // Global variable for province search pagination
+
+        function filterCentersByProvince(page = 1) {
             const provinceSelect = document.getElementById('province-select');
             const selectedProvinceCode = provinceSelect.value;
-            displayLegalAidCenters(selectedProvinceCode);
             displayConsultationWebsite(selectedProvinceCode); // 显示咨询网站
-        }
 
-        function displayLegalAidCenters(filterProvinceCode = '') {
-            if (!window.维权数据 || !window.维权数据.legalAidCenters || Object.keys(window.维权数据.legalAidCenters).length === 0) {
-                document.getElementById('nearby-centers').innerHTML = '<p>未找到法律援助中心数据。请访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 查询。</p>';
+            const nearbyCentersDiv = document.getElementById('nearby-centers');
+            nearbyCentersDiv.innerHTML = '<p>正在搜索指定省份的法律服务机构...</p>';
+
+            if (!map) {
+                showError('地图未初始化');
                 return;
             }
 
-            clearMarkers();
-            let filteredCenters = [];
-            if (filterProvinceCode && 维权数据.legalAidCenters[filterProvinceCode]) {
-                filteredCenters = 维权数据.legalAidCenters[filterProvinceCode];
-            } else if (!filterProvinceCode) {
-                // 如果没有选择省份，则显示所有省份的中心
-                for (const code in 维权数据.legalAidCenters) {
-                    filteredCenters = filteredCenters.concat(维权数据.legalAidCenters[code]);
-                }
+            if (!selectedProvinceCode) {
+                nearbyCentersDiv.innerHTML = '<p>请选择一个省份来搜索法律服务机构。</p>';
+                clearMarkers();
+                return;
             }
 
-            let html = '<ul style="list-style:none; padding:0;">';
-            if (filteredCenters.length === 0) {
-                html += '<p>当前省份未找到法律援助中心。</p>';
-            } else {
-                filteredCenters.forEach(center => {
-                    addMarker(center);
-                    const tel = center.phone ? `<br>电话：<a href="tel:${center.phone}">${center.phone}</a>` : '';
-                    const amapNavUrl = `https://uri.amap.com/navigation?to=${center.lng},${center.lat},${center.name}&mode=walk&callnative=1`;
+            const provinceData = 维权数据.provinces[selectedProvinceCode];
+            const provinceName = provinceData.name;
+            currentProvinceSearchPage = page;
 
-                    html += `
-                        <li style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:8px;">
-                            <strong>${center.name}</strong><br>
-                            地址：${center.address}${tel}<br>
-                            <a href="#" onclick="map.setCenter([${center.lng}, ${center.lat}]); map.setZoom(15); return false;" style="color:#28a745;">在地图上查看</a>
-                            | <a href="${amapNavUrl}" target="_blank" style="color:#007bff;">高德地图导航</a>
-                        </li>`;
-                });
-                if (map) {
-                    map.setFitView();
+            // 1. 先通过 PlaceSearch 搜索该省最权威的“法律援助中心”作为置顶
+            const aidSearch = new AMap.PlaceSearch({
+                pageSize: 1,
+                pageIndex: 1,
+                city: provinceName,
+                autoFitView: false // 不自动缩放，留给后面的律师事务所搜索处理
+            });
+
+            // 搜索词：省名 + 法律援助中心
+            const aidQuery = provinceName + '法律援助中心';
+
+            aidSearch.search(aidQuery, (status, result) => {
+                nearbyCentersDiv.innerHTML = ''; // 清空加载提示
+
+                let pinnedPoiHtml = '';
+                if (status === 'complete' && result.poiList && result.poiList.pois.length > 0) {
+                    const poi = result.poiList.pois[0];
+                    pinnedPoiHtml = `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ffccc7;">
+                            <strong style="font-size: 0.9em; color: #333;">地址：${poi.address}</strong><br>
+                            <div style="margin-top: 8px;">
+                                <a href="#" onclick="map.setCenter([${poi.location.lng}, ${poi.location.lat}]); map.setZoom(15); return false;" style="color:#28a745; text-decoration: none; font-size: 0.9em;">📍 在地图上查看</a>
+                                <span style="margin: 0 8px; color: #ccc;">|</span>
+                                <a href="https://uri.amap.com/navigation?to=${poi.location.lng},${poi.location.lat},${poi.name}&mode=walk&callnative=1" target="_blank" style="color:#007bff; text-decoration: none; font-size: 0.9em;">🚗 高德地图导航</a>
+                            </div>
+                        </div>
+                    `;
                 }
-            }
-            html += '</ul>';
-            html += '<p style="text-align:center; margin-top:20px;">您也可以访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 进行更全面的查询。</p>';
-            document.getElementById('nearby-centers').innerHTML = html;
+
+                // 创建置顶模块
+                const pinnedDiv = document.createElement('div');
+                pinnedDiv.className = 'legal-aid-pinned';
+                
+                let phonesHtml = '';
+                if (provinceData.phones) {
+                    for (const [name, phone] of Object.entries(provinceData.phones)) {
+                        phonesHtml += `<div><strong>${name}：</strong><a href="tel:${phone}">${phone}</a></div>`;
+                    }
+                }
+
+                pinnedDiv.innerHTML = `
+                    <div class="pinned-tag">官方法律援助中心（本省置顶）</div>
+                    <h3 style="margin: 0 0 10px 0; color: #d32f2f;">${provinceName}法律援助中心</h3>
+                    <div style="font-size: 0.95em; line-height: 1.6;">
+                        ${phonesHtml || '暂无电话信息'}
+                        ${pinnedPoiHtml}
+                        <div style="margin-top: 10px; color: #666; font-size: 0.85em;">注：以上为该省份官方机构，建议优先拨打电话咨询。</div>
+                    </div>
+                `;
+                nearbyCentersDiv.appendChild(pinnedDiv);
+
+                // 2. 继续执行原有的“律师事务所”分页搜索
+                searchLawyers(provinceName, page, nearbyCentersDiv);
+            });
+        }
+
+        // 拆分出搜索律师的函数
+        function searchLawyers(provinceName, page, container) {
+            const placeSearch = new AMap.PlaceSearch({
+                pageSize: 3,
+                pageIndex: page,
+                city: provinceName,
+                map: map,
+                autoFitView: true
+            });
+
+            const searchQuery = (provinceName === '香港' || provinceName === '澳门') ? '律师' : '律师事务所';
+
+            placeSearch.search(searchQuery, (status, result) => {
+                if (status === 'complete' && result.info === 'OK') {
+                    const resultsHeader = document.createElement('p');
+                    resultsHeader.style.borderBottom = '1px solid #eee';
+                    resultsHeader.style.paddingBottom = '10px';
+                    resultsHeader.style.marginTop = '20px';
+                    resultsHeader.innerHTML = `<strong>${provinceName}的${searchQuery} (第 ${page} 页)</strong>`;
+                    container.appendChild(resultsHeader);
+
+                    if (result.poiList && result.poiList.pois.length > 0) {
+                        result.poiList.pois.forEach(poi => {
+                            const poiDiv = document.createElement('div');
+                            poiDiv.className = 'poi-item';
+                            poiDiv.innerHTML = `
+                                <strong style="color: #333;">${poi.name}</strong><br>
+                                <span style="font-size: 0.9em; color: #666;">地址：${poi.address}</span><br>
+                                <span style="font-size: 0.9em; color: #666;">电话：${poi.tel || '暂无'}</span><br>
+                                <div style="margin-top: 8px;">
+                                    <a href="#" onclick="map.setCenter([${poi.location.lng}, ${poi.location.lat}]); map.setZoom(15); return false;" style="color:#28a745; text-decoration: none; font-size: 0.9em;">📍 在地图上查看</a>
+                                    <span style="margin: 0 8px; color: #ccc;">|</span>
+                                    <a href="https://uri.amap.com/navigation?to=${poi.location.lng},${poi.location.lat},${poi.name}&mode=walk&callnative=1" target="_blank" style="color:#007bff; text-decoration: none; font-size: 0.9em;">🚗 高德地图导航</a>
+                                </div>
+                            `;
+                            container.appendChild(poiDiv);
+                        });
+                    } else {
+                        container.innerHTML += `<p>未在${provinceName}找到相关的${searchQuery}。</p>`;
+                    }
+
+                    // 翻页控件
+                    const totalPages = Math.ceil(result.poiList.count / 3);
+                    if (totalPages > 1) {
+                        const paginationDiv = document.createElement('div');
+                        paginationDiv.className = 'pagination-container';
+
+                        const prevButton = document.createElement('button');
+                        prevButton.className = 'page-btn';
+                        prevButton.textContent = '上一页';
+                        prevButton.disabled = page <= 1;
+                        prevButton.onclick = () => filterCentersByProvince(page - 1);
+                        paginationDiv.appendChild(prevButton);
+
+                        const startPage = Math.max(1, page - 2);
+                        const endPage = Math.min(totalPages, startPage + 4);
+                        for (let i = (endPage - startPage < 4 ? Math.max(1, endPage - 4) : startPage); i <= endPage; i++) {
+                            if (i < 1) continue;
+                            const pageButton = document.createElement('button');
+                            pageButton.className = `page-btn ${i === page ? 'active' : ''}`;
+                            pageButton.textContent = i;
+                            pageButton.onclick = () => filterCentersByProvince(i);
+                            paginationDiv.appendChild(pageButton);
+                        }
+
+                        const nextButton = document.createElement('button');
+                        nextButton.className = 'page-btn';
+                        nextButton.textContent = '下一页';
+                        nextButton.disabled = page >= totalPages;
+                        nextButton.onclick = () => filterCentersByProvince(page + 1);
+                        paginationDiv.appendChild(nextButton);
+
+                        container.appendChild(paginationDiv);
+                    }
+
+                    const footer = document.createElement('p');
+                    footer.style.textAlign = 'center';
+                    footer.style.fontSize = '0.8em';
+                    footer.style.color = '#999';
+                    footer.style.marginTop = '15px';
+                    footer.innerHTML = `共找到 ${result.poiList.count} 家机构，第 ${page}/${totalPages} 页`;
+                    container.appendChild(footer);
+                } else {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.innerHTML = `搜索失败或无数据。如果您在${provinceName}，建议直接拨打上方法律援助电话咨询。`;
+                    container.appendChild(errorMsg);
+                }
+            });
         }
 
         // 新增：显示咨询网站
@@ -187,7 +374,7 @@
             if (websiteDiv) {
                 if (provinceCode && 维权数据.consultationWebsites[provinceCode]) {
                     const site = 维权数据.consultationWebsites[provinceCode];
-                    websiteDiv.innerHTML = `<p><strong>${维权数据.provinces[provinceCode]}法律援助咨询网站：</strong> <a href="${site.url}" target="_blank">${site.name}</a></p>`;
+                    websiteDiv.innerHTML = `<p><strong>${维权数据.provinces[provinceCode].name}法律援助咨询网站：</strong> <a href="${site.url}" target="_blank">${site.name}</a></p>`;
                 } else {
                     websiteDiv.innerHTML = ''; // 清空
                 }
@@ -207,8 +394,9 @@
                 map.addControl(new AMap.Scale());
                 map.addControl(new AMap.ToolBar());
 
+                document.getElementById('get-location-button').disabled = false; // 启用按钮
+
                 // Initial display
-                populateProvinces();
                 // 默认不显示任何法律援助中心，等待用户选择省份或点击定位
                 // displayLegalAidCenters();
                 displayConsultationWebsite(''); // 初始不显示咨询网站
@@ -226,27 +414,55 @@
                 return;
             }
 
-            document.getElementById('nearby-centers').innerHTML = '<p>正在搜索附近的酒店...</p>';
+            const nearbyCentersDiv = document.getElementById('nearby-centers');
+            nearbyCentersDiv.innerHTML = '<p>正在搜索附近的酒店...</p>';
 
             const placeSearch = new AMap.PlaceSearch({
-                pageSize: 10,
+                pageSize: 3,
                 pageIndex: 1,
-                city: '全国', // 可以在这里指定城市，或者根据userLocation的城市信息
+                city: '全国',
                 map: map,
-                panel: "nearby-centers",
+                // panel: "nearby-centers", // 移除 panel 选项
                 autoFitView: true
             });
 
             placeSearch.searchNearBy('酒店', userLocation, 10000, (status, result) => {
                 if (status === 'complete' && result.info === 'OK') {
                     const panelElement = document.getElementById('nearby-centers');
+                    panelElement.innerHTML = ''; // Clear previous results
+
                     const header = document.createElement('p');
-                    header.innerHTML = `<strong>以下是您附近 10 公里内的酒店：</strong>`;
-                    panelElement.insertBefore(header, panelElement.firstChild);
+                    header.style.borderBottom = '1px solid #eee';
+                    header.style.paddingBottom = '10px';
+                    header.innerHTML = `<strong>您附近 10 公里内的酒店</strong>`;
+                    panelElement.appendChild(header);
+
+                    if (result.poiList && result.poiList.pois.length > 0) {
+                        result.poiList.pois.forEach(poi => {
+                            const poiDiv = document.createElement('div');
+                            poiDiv.className = 'poi-item';
+                            poiDiv.style.borderLeftColor = '#ffc107'; // 酒店使用黄色边框
+                            poiDiv.innerHTML = `
+                                <strong style="color: #333;">${poi.name}</strong><br>
+                                <span style="font-size: 0.9em; color: #666;">地址：${poi.address}</span><br>
+                                <span style="font-size: 0.9em; color: #666;">电话：${poi.tel || '暂无'}</span><br>
+                                <div style="margin-top: 8px;">
+                                    <a href="#" onclick="map.setCenter([${poi.location.lng}, ${poi.location.lat}]); map.setZoom(15); return false;" style="color:#28a745; text-decoration: none; font-size: 0.9em;">📍 在地图上查看</a>
+                                    <span style="margin: 0 8px; color: #ccc;">|</span>
+                                    <a href="https://uri.amap.com/navigation?to=${poi.location.lng},${poi.location.lat},${poi.name}&mode=walk&callnative=1" target="_blank" style="color:#007bff; text-decoration: none; font-size: 0.9em;">🚗 高德地图导航</a>
+                                </div>
+                            `;
+                            panelElement.appendChild(poiDiv);
+                        });
+                    } else {
+                        panelElement.innerHTML += '<p>未找到附近酒店。</p>';
+                    }
 
                     const footer = document.createElement('p');
                     footer.style.textAlign = 'center';
-                    footer.style.marginTop = '20px';
+                    footer.style.fontSize = '0.8em';
+                    footer.style.color = '#999';
+                    footer.style.marginTop = '15px';
                     footer.innerHTML = `数据来源于高德地图。`;
                     panelElement.appendChild(footer);
                 } else {
@@ -256,19 +472,9 @@
             });
         }
 
-        // 计算距离函数
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // 地球半径 km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return (R * c).toFixed(1);
-        }
+        let currentNearbyAidSearchPage = 1; // Global variable for nearby aid search pagination
 
-        function getAndShowNearbyAid() {
+        function getAndShowNearbyAid(page = 1) {
             document.getElementById('nearby-centers').innerHTML = '<p>正在获取您的位置并搜索附近的法律援助中心...</p>';
             if (!map) {
                 showError('地图未初始化');
@@ -280,7 +486,7 @@
                 timeout: 20000,
                 zoomToAccuracy: true,
                 showButton: false,
-                showMarker: false, // 将此设置为 false，我们将手动添加标记
+                showMarker: false,
             });
 
             map.add(geolocation);
@@ -288,30 +494,107 @@
                 if (status === 'complete') {
                     userLocation = result.position;
                     map.setCenter(userLocation);
-                    clearUserMarker(); // 清除旧的用户标记
-                    userMarker = new AMap.Marker({ // 添加新的用户标记
+                    clearUserMarker();
+                    userMarker = new AMap.Marker({
                         position: userLocation,
                         map: map,
-                        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_bs.png', // 可以自定义图标
+                        icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_bs.png',
                         title: '我的位置'
                     });
 
-                    // 获取到用户位置后，根据距离排序并显示法律援助中心
-                    let allCenters = [];
-                    for (const provCode in 维权数据.legalAidCenters) {
-                        if (维权数据.legalAidCenters.hasOwnProperty(provCode)) {
-                            allCenters = allCenters.concat(维权数据.legalAidCenters[provCode]);
-                        }
-                    }
+                    currentNearbyAidSearchPage = page;
 
-                    allCenters.forEach(center => {
-                        center.distance = getDistance(userLocation.lat, userLocation.lng, center.lat, center.lng);
+                    // 使用 AMap.PlaceSearch 搜索附近的法律援助中心
+                    const placeSearch = new AMap.PlaceSearch({
+                        pageSize: 3, // 显示3个结果
+                        pageIndex: currentNearbyAidSearchPage,
+                        city: '全国', // 可以在这里指定城市，或者根据userLocation的城市信息
+                        map: map,
+                        // panel: "nearby-centers", // 移除 panel 选项
+                        autoFitView: true
                     });
 
-                    allCenters.sort((a, b) => a.distance - b.distance);
+                    placeSearch.searchNearBy('法律援助中心', userLocation, 10000, (searchStatus, searchResult) => {
+                        if (searchStatus === 'complete' && searchResult.info === 'OK') {
+                            const panelElement = document.getElementById('nearby-centers');
+                            panelElement.innerHTML = ''; // Clear previous results
 
-                    // 仅显示最近的法律援助中心，并更新列表和地图标记
-                    displayLegalAidCentersWithDistance(allCenters.slice(0, 10)); // 显示最近的10个
+                            const header = document.createElement('p');
+                            header.style.borderBottom = '1px solid #eee';
+                            header.style.paddingBottom = '10px';
+                            header.innerHTML = `<strong>您附近 10 公里内的法律援助中心 (第 ${currentNearbyAidSearchPage} 页)</strong>`;
+                            panelElement.appendChild(header);
+
+                            // Add results from PlaceSearch
+                            if (searchResult.poiList && searchResult.poiList.pois.length > 0) {
+                                searchResult.poiList.pois.forEach(poi => {
+                                    const poiDiv = document.createElement('div');
+                                    poiDiv.className = 'poi-item';
+                                    poiDiv.innerHTML = `
+                                        <strong style="color: #333;">${poi.name}</strong><br>
+                                        <span style="font-size: 0.9em; color: #666;">地址：${poi.address}</span><br>
+                                        <span style="font-size: 0.9em; color: #666;">电话：${poi.tel || '暂无'}</span><br>
+                                        <div style="margin-top: 8px;">
+                                            <a href="#" onclick="map.setCenter([${poi.location.lng}, ${poi.location.lat}]); map.setZoom(15); return false;" style="color:#28a745; text-decoration: none; font-size: 0.9em;">📍 在地图上查看</a>
+                                            <span style="margin: 0 8px; color: #ccc;">|</span>
+                                            <a href="https://uri.amap.com/navigation?to=${poi.location.lng},${poi.location.lat},${poi.name}&mode=walk&callnative=1" target="_blank" style="color:#007bff; text-decoration: none; font-size: 0.9em;">🚗 高德地图导航</a>
+                                        </div>
+                                    `;
+                                    panelElement.appendChild(poiDiv);
+                                });
+                            } else {
+                                panelElement.innerHTML += '<p>未找到相关法律援助中心。</p>';
+                            }
+
+                            // Add pagination controls
+                            const totalPages = Math.ceil(searchResult.poiList.count / placeSearch.getOptions().pageSize);
+                            if (totalPages > 1) {
+                                const paginationDiv = document.createElement('div');
+                                paginationDiv.className = 'pagination-container';
+
+                                // Previous Button
+                                const prevButton = document.createElement('button');
+                                prevButton.className = 'page-btn';
+                                prevButton.textContent = '上一页';
+                                prevButton.disabled = currentNearbyAidSearchPage <= 1;
+                                prevButton.onclick = () => getAndShowNearbyAid(currentNearbyAidSearchPage - 1);
+                                paginationDiv.appendChild(prevButton);
+
+                                // Page number buttons
+                                const startPage = Math.max(1, currentNearbyAidSearchPage - 2);
+                                const endPage = Math.min(totalPages, startPage + 4);
+                                
+                                for (let i = (endPage - startPage < 4 ? Math.max(1, endPage - 4) : startPage); i <= endPage; i++) {
+                                    const pageButton = document.createElement('button');
+                                    pageButton.className = `page-btn ${i === currentNearbyAidSearchPage ? 'active' : ''}`;
+                                    pageButton.textContent = i;
+                                    pageButton.onclick = () => getAndShowNearbyAid(i);
+                                    paginationDiv.appendChild(pageButton);
+                                }
+
+                                // Next Button
+                                const nextButton = document.createElement('button');
+                                nextButton.className = 'page-btn';
+                                nextButton.textContent = '下一页';
+                                nextButton.disabled = currentNearbyAidSearchPage >= totalPages;
+                                nextButton.onclick = () => getAndShowNearbyAid(currentNearbyAidSearchPage + 1);
+                                paginationDiv.appendChild(nextButton);
+
+                                panelElement.appendChild(paginationDiv);
+                            }
+
+                            const footer = document.createElement('p');
+                            footer.style.textAlign = 'center';
+                            footer.style.fontSize = '0.8em';
+                            footer.style.color = '#999';
+                            footer.style.marginTop = '15px';
+                            footer.innerHTML = `共 ${searchResult.poiList.count} 条结果，第 ${currentNearbyAidSearchPage}/${totalPages} 页`;
+                            panelElement.appendChild(footer);
+                        } else {
+                            document.getElementById('nearby-centers').innerHTML = `<p>搜索法律援助中心失败：${searchResult.info || '未知错误'}</p>`;
+                            console.error('搜索法律援助中心失败:', searchResult);
+                        }
+                    });
 
                 } else {
                     showError(result);
@@ -319,38 +602,16 @@
             });
         }
 
-        // 新增：显示带有距离信息的法律援助中心
-        function displayLegalAidCentersWithDistance(centers) {
-            clearMarkers();
-            let html = '<ul style="list-style:none; padding:0;">';
-            if (centers.length === 0) {
-                html += '<p>附近未找到法律援助中心。</p>';
-            } else {
-                centers.forEach(center => {
-                    addMarker(center);
-                    const tel = center.phone ? `<br>电话：<a href="tel:${center.phone}">${center.phone}</a>` : '';
-                    const amapNavUrl = `https://uri.amap.com/navigation?to=${center.lng},${center.lat},${center.name}&mode=walk&callnative=1`;
+        // 计算距离函数 (不再需要，因为使用 PlaceSearch)
+        // function getDistance(lat1, lon1, lat2, lon2) { ... }
 
-                    html += `
-                        <li style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:8px;">
-                            <strong>${center.name}</strong><br>
-                            地址：${center.address}${tel}<br>
-                            距离约 ${center.distance} 公里<br>
-                            <a href="#" onclick="map.setCenter([${center.lng}, ${center.lat}]); map.setZoom(15); return false;" style="color:#28a745;">在地图上查看</a>
-                            | <a href="${amapNavUrl}" target="_blank" style="color:#007bff;">高德地图导航</a>
-                        </li>`;
-                });
-                if (map) {
-                    map.setFitView();
-                }
-            }
-            html += '</ul>';
-            html += '<p style="text-align:center; margin-top:20px;">您也可以访问 <a href="https://www.12348.gov.cn/" target="_blank">中国法律服务网</a> 进行更全面的查询。</p>';
-            document.getElementById('nearby-centers').innerHTML = html;
-        }
+        // 新增：显示带有距离信息的法律援助中心 (不再需要，因为使用 PlaceSearch)
+        // function displayLegalAidCentersWithDistance(centers) { ... }
 
         document.addEventListener('DOMContentLoaded', () => {
+            populateProvinces(); // 确保在地图初始化前填充省份下拉菜单
             initMap();
+            filterCentersByProvince(); // 初始加载时根据默认选择的省份过滤中心
         });
     </script>
     <footer>
