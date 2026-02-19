@@ -190,6 +190,7 @@
             });
 
             sortedProvinces.forEach(code => {
+                if (code === '00') return; // 律师地图搜索不需要"全国通用"
                 const option = document.createElement('option');
                 option.value = code;
                 option.textContent = 维权数据.provinces[code].name;

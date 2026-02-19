@@ -334,7 +334,7 @@
             // 电话实时更新
             function renderPhones() {
                 const code = select.value;
-                const prov = 维权数据.provinces[code] || 维权数据.provinces['00'];
+                const prov = 维权数据.provinces[code] || 维权数据.provinces['00'] || { phones: {} };
                 let pHtml = '';
 
                 const normalizePhone = (phoneStr) => phoneStr.replace(/\D/g, '');
