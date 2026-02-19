@@ -52,6 +52,9 @@
         .form-group {
             margin-bottom: 16px;
         }
+        .hidden-group {
+            display: none;
+        }
         label {
             display: block;
             margin-bottom: 6px;
@@ -110,6 +113,8 @@
             color: #2c5282;
             border: 2px solid #2c5282;
         }
+        
+        /* 打印样式 */
         @media print {
             header, .card:first-of-type, .action-buttons, .back-button, h2 {
                 display: none !important;
@@ -124,6 +129,7 @@
                 background: white;
                 font-size: 14pt;
                 padding: 0;
+                white-space: pre-wrap;
             }
             body {
                 background: white;
@@ -141,14 +147,17 @@
 
         <div class="card">
             <div class="form-group">
-                <label>选择文书类型</label>
+                <label>请选择文书类型 (5种常用类型)</label>
                 <select id="docType" onchange="toggleFields()">
-                    <option value="cuikuan">欠薪催款函 (发给老板)</option>
-                    <option value="zhongcai">劳动仲裁申请书 (提交给仲裁委)</option>
+                    <option value="cuikuan">1. 欠薪催款函 (发给老板)</option>
+                    <option value="zhongcai">2. 劳动仲裁申请书 (通用)</option>
+                    <option value="double_wage">3. 未签劳动合同二倍工资申请</option>
+                    <option value="forced_resign">4. 被迫解除劳动合同通知书 (拿补偿金)</option>
+                    <option value="injury">5. 工伤认定申请书</option>
                 </select>
             </div>
 
-            <!-- 通用字段 -->
+            <!-- 基础信息 (所有类型通用) -->
             <div class="form-group">
                 <label>您的姓名</label>
                 <input type="text" id="userName" placeholder="例如：张三">
@@ -158,24 +167,56 @@
                 <input type="text" id="userId" placeholder="用于正式文书">
             </div>
             <div class="form-group">
+                <label>联系电话</label>
+                <input type="tel" id="userPhone" placeholder="用于接收通知">
+            </div>
+            <div class="form-group">
                 <label>入职日期</label>
                 <input type="date" id="startDate">
             </div>
-            
-            <!-- 公司信息 -->
             <div class="form-group">
-                <label>公司/老板名称</label>
-                <input type="text" id="companyName" placeholder="公司全称 或 老板姓名">
+                <label>岗位/职务</label>
+                <input type="text" id="jobTitle" placeholder="例如：操作工、厨师">
+            </div>
+            
+            <!-- 公司信息 (所有类型通用) -->
+            <div class="form-group">
+                <label>公司全称 / 老板姓名</label>
+                <input type="text" id="companyName" placeholder="请填写营业执照上的全称">
             </div>
 
-            <!-- 欠薪详情 -->
-            <div class="form-group">
+            <!-- 特定字段：欠薪/仲裁 -->
+            <div id="group-money" class="form-group">
                 <label>欠薪金额 (元)</label>
                 <input type="number" id="amount" placeholder="例如：15000">
             </div>
-            <div class="form-group">
-                <label>欠薪时间段</label>
+            <div id="group-period" class="form-group">
+                <label>欠薪/未签合同时间段</label>
                 <input type="text" id="period" placeholder="例如：2023年10月至12月">
+            </div>
+
+            <!-- 特定字段：被迫解除 -->
+            <div id="group-resign" class="form-group hidden-group">
+                <label>解除劳动关系原因</label>
+                <select id="resignReason">
+                    <option value="unpaid">未及时足额支付劳动报酬</option>
+                    <option value="social">未依法为劳动者缴纳社会保险费</option>
+                    <option value="rule">规章制度违反法律、法规规定</option>
+                </select>
+            </div>
+
+            <!-- 特定字段：工伤 -->
+            <div id="group-injury" class="form-group hidden-group">
+                <label>受伤日期</label>
+                <input type="date" id="injuryDate">
+            </div>
+            <div id="group-hospital" class="form-group hidden-group">
+                <label>就诊医院</label>
+                <input type="text" id="hospital" placeholder="例如：某某市人民医院">
+            </div>
+            <div id="group-diagnosis" class="form-group hidden-group">
+                <label>诊断结果</label>
+                <input type="text" id="diagnosis" placeholder="例如：右腿骨折">
             </div>
 
             <button class="btn" onclick="generateDoc()">生成文书</button>
@@ -193,27 +234,71 @@
 
     <script>
         function toggleFields() {
-            // 根据类型显示/隐藏特定字段（如有需要可扩展）
+            const type = document.getElementById('docType').value;
+            
+            // 获取所有动态字段组
+            const moneyGroup = document.getElementById('group-money');
+            const periodGroup = document.getElementById('group-period');
+            const resignGroup = document.getElementById('group-resign');
+            const injuryGroup = document.getElementById('group-injury');
+            const hospitalGroup = document.getElementById('group-hospital');
+            const diagnosisGroup = document.getElementById('group-diagnosis');
+
+            // 默认全部隐藏
+            moneyGroup.style.display = 'none';
+            periodGroup.style.display = 'none';
+            resignGroup.style.display = 'none';
+            injuryGroup.style.display = 'none';
+            hospitalGroup.style.display = 'none';
+            diagnosisGroup.style.display = 'none';
+
+            // 根据类型显示
+            if (type === 'cuikuan' || type === 'zhongcai') {
+                moneyGroup.style.display = 'block';
+                periodGroup.style.display = 'block';
+            } else if (type === 'double_wage') {
+                moneyGroup.style.display = 'block'; // 此处复用为二倍工资差额
+                periodGroup.style.display = 'block'; // 未签合同时间段
+                document.querySelector('#group-money label').textContent = '二倍工资差额 (元)';
+                document.querySelector('#group-period label').textContent = '未签合同时间段';
+            } else if (type === 'forced_resign') {
+                resignGroup.style.display = 'block';
+            } else if (type === 'injury') {
+                injuryGroup.style.display = 'block';
+                hospitalGroup.style.display = 'block';
+                diagnosisGroup.style.display = 'block';
+            }
+            
+            // 恢复默认标签
+            if (type !== 'double_wage') {
+                document.querySelector('#group-money label').textContent = '欠薪金额 (元)';
+                document.querySelector('#group-period label').textContent = '欠薪时间段';
+            }
         }
+
+        // 初始化运行一次以设置正确状态
+        window.onload = toggleFields;
 
         function generateDoc() {
             const type = document.getElementById('docType').value;
-            const name = document.getElementById('userName').value || '[您的姓名]';
-            const id = document.getElementById('userId').value || '[身份证号]';
-            const company = document.getElementById('companyName').value || '[公司名称]';
-            const amount = document.getElementById('amount').value || '[金额]';
-            const period = document.getElementById('period').value || '[时间段]';
-            const start = document.getElementById('startDate').value || '[入职日期]';
+            const name = document.getElementById('userName').value || '___';
+            const id = document.getElementById('userId').value || '___';
+            const phone = document.getElementById('userPhone').value || '___';
+            const company = document.getElementById('companyName').value || '___';
+            const start = document.getElementById('startDate').value || '___';
+            const job = document.getElementById('jobTitle').value || '___';
             const today = new Date().toLocaleDateString('zh-CN');
 
             let content = '';
 
             if (type === 'cuikuan') {
+                const amount = document.getElementById('amount').value || '___';
+                const period = document.getElementById('period').value || '___';
                 content = `【欠薪催款函】
 
 致：${company}
 
-本人（姓名：${name}，身份证号：${id}）于 ${start} 入职贵司/处。
+本人（姓名：${name}，身份证号：${id}）于 ${start} 入职贵司/处，担任 ${job} 职务。
 截至 ${today}，贵司/处 尚未支付本人 ${period} 的工资，共计人民币 ${amount} 元。
 
 根据《中华人民共和国劳动法》及《工资支付暂行规定》，工资应当按月足额支付给劳动者本人。贵司/处 的行为已严重违反法律规定。
@@ -225,14 +310,18 @@
 特此函告。
 
 催款人：${name}
+联系电话：${phone}
 日期：${today}`;
-            } else {
+
+            } else if (type === 'zhongcai') {
+                const amount = document.getElementById('amount').value || '___';
+                const period = document.getElementById('period').value || '___';
                 content = `【劳动仲裁申请书】
 
 申请人：${name}
 身份证号：${id}
+联系电话：${phone}
 住址：[请补充您的住址]
-联系电话：[请补充您的电话]
 
 被申请人：${company}
 地址：[请补充公司地址]
@@ -240,15 +329,98 @@
 
 【仲裁请求】
 1. 请求裁决被申请人支付申请人 ${period} 期间的工资共计人民币 ${amount} 元；
-2. 请求裁决被申请人承担本案相关费用。
+2. 请求裁决被申请人支付解除劳动合同经济补偿金（如适用）；
+3. 请求裁决被申请人承担本案相关费用。
 
 【事实与理由】
-申请人于 ${start} 入职被申请人处，担任 [职务] 一职。双方存在劳动关系。
+申请人于 ${start} 入职被申请人处，担任 ${job} 一职。双方存在劳动关系。
 在职期间，申请人正常出勤，但被申请人自 ${period} 起无故拖欠申请人工资。经申请人多次催讨，被申请人仍未支付。
+
 被申请人的行为严重损害了申请人的合法权益。为维护法律尊严和申请人的合法权益，特依据《中华人民共和国劳动争议调解仲裁法》之规定，向贵委提起仲裁申请，望依法裁决。
 
 此致
 [请填写入当地] 劳动人事争议仲裁委员会
+
+申请人（签字）：_____________
+日期：${today}`;
+
+            } else if (type === 'double_wage') {
+                const amount = document.getElementById('amount').value || '___';
+                const period = document.getElementById('period').value || '___';
+                content = `【劳动仲裁申请书（未签合同二倍工资）】
+
+申请人：${name}
+身份证号：${id}
+联系电话：${phone}
+
+被申请人：${company}
+
+【仲裁请求】
+1. 请求裁决确认申请人与被申请人自 ${start} 至今存在劳动关系；
+2. 请求裁决被申请人支付 ${period} 期间因未签订书面劳动合同的二倍工资差额共计人民币 ${amount} 元；
+3. 请求裁决被申请人补缴社保（如适用）。
+
+【事实与理由】
+申请人于 ${start} 入职被申请人处，担任 ${job} 一职。
+入职后，申请人多次要求与被申请人签订书面劳动合同，但被申请人一直推脱，直至今日仍未签订。
+
+根据《中华人民共和国劳动合同法》第八十二条规定，用人单位自用工之日起超过一个月不满一年未与劳动者订立书面劳动合同的，应当向劳动者每月支付二倍的工资。
+
+为维护申请人合法权益，特提起仲裁。
+
+此致
+[请填写入当地] 劳动人事争议仲裁委员会
+
+申请人（签字）：_____________
+日期：${today}`;
+
+            } else if (type === 'forced_resign') {
+                const reasonSelect = document.getElementById('resignReason');
+                const reasonText = reasonSelect.options[reasonSelect.selectedIndex].text;
+                
+                content = `【解除劳动合同通知书】
+
+致：${company}
+
+本人（姓名：${name}）于 ${start} 入职贵司，担任 ${job} 职务。
+现因贵司存在以下违法行为：
+${reasonText}
+
+根据《中华人民共和国劳动合同法》第三十八条之规定，本人被迫提出解除与贵司的劳动合同，解除时间即刻生效。
+请贵司在收到本通知后 3 日内为本人办理离职手续，并支付经济补偿金及结清所有工资。
+
+特此通知。
+
+通知人：${name}
+身份证号：${id}
+联系电话：${phone}
+日期：${today}`;
+
+            } else if (type === 'injury') {
+                const injuryDate = document.getElementById('injuryDate').value || '___';
+                const hospital = document.getElementById('hospital').value || '___';
+                const diagnosis = document.getElementById('diagnosis').value || '___';
+                
+                content = `【工伤认定申请书】
+
+申请人：${name}
+身份证号：${id}
+联系电话：${phone}
+
+被申请人（单位）：${company}
+
+【申请事项】
+请求依法认定申请人于 ${injuryDate} 受到的事故伤害为工伤。
+
+【事实与理由】
+申请人是受聘于被申请人的员工，岗位为 ${job}，入职时间为 ${start}。
+${injuryDate}，申请人在工作时间和工作场所内，因工作原因受到事故伤害。
+受伤后，申请人被送往 ${hospital} 治疗，经诊断为：${diagnosis}。
+
+根据《工伤保险条例》第十四条的规定，申请人的情形符合认定工伤的条件。特提出申请，请予认定。
+
+此致
+[请填写入当地] 人力资源和社会保障局
 
 申请人（签字）：_____________
 日期：${today}`;
