@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智能文书生成 - 维权助手</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4f8 0%, #e0e7ed 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0 20px;
+            position: relative;
+        }
+        .back-button {
+            position: absolute;
+            left: 10px;
+            top: 35px;
+            font-size: 1.1rem;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        h1 {
+            color: #2c5282;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4a90e2, #2c5282);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.1s;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .preview-area {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: "Songti SC", "SimSun", serif; /* 仿宋/宋体，更像公文 */
+            line-height: 1.8;
+            color: #2d3748;
+            display: none; /* 默认隐藏 */
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            display: none; /* 默认隐藏 */
+        }
+        .btn-outline {
+            background: white;
+            color: #2c5282;
+            border: 2px solid #2c5282;
+        }
+        @media print {
+            header, .card:first-of-type, .action-buttons, .back-button, h2 {
+                display: none !important;
+            }
+            .card#resultCard {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .preview-area {
+                border: none;
+                background: white;
+                font-size: 14pt;
+                padding: 0;
+            }
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-button">← 返回</a>
+            <h1>智能文书生成</h1>
+            <div class="subtitle">填写信息，一键生成标准维权文书</div>
+        </header>
+
+        <div class="card">
+            <div class="form-group">
+                <label>选择文书类型</label>
+                <select id="docType" onchange="toggleFields()">
+                    <option value="cuikuan">欠薪催款函 (发给老板)</option>
+                    <option value="zhongcai">劳动仲裁申请书 (提交给仲裁委)</option>
+                </select>
+            </div>
+
+            <!-- 通用字段 -->
+            <div class="form-group">
+                <label>您的姓名</label>
+                <input type="text" id="userName" placeholder="例如：张三">
+            </div>
+            <div class="form-group">
+                <label>您的身份证号</label>
+                <input type="text" id="userId" placeholder="用于正式文书">
+            </div>
+            <div class="form-group">
+                <label>入职日期</label>
+                <input type="date" id="startDate">
+            </div>
+            
+            <!-- 公司信息 -->
+            <div class="form-group">
+                <label>公司/老板名称</label>
+                <input type="text" id="companyName" placeholder="公司全称 或 老板姓名">
+            </div>
+
+            <!-- 欠薪详情 -->
+            <div class="form-group">
+                <label>欠薪金额 (元)</label>
+                <input type="number" id="amount" placeholder="例如：15000">
+            </div>
+            <div class="form-group">
+                <label>欠薪时间段</label>
+                <input type="text" id="period" placeholder="例如：2023年10月至12月">
+            </div>
+
+            <button class="btn" onclick="generateDoc()">生成文书</button>
+        </div>
+
+        <div class="card" id="resultCard" style="display:none;">
+            <h2>文书预览</h2>
+            <div id="preview" class="preview-area"></div>
+            <div class="action-buttons" id="actionBtns">
+                <button class="btn" onclick="copyDoc()">复制全文</button>
+                <button class="btn btn-outline" onclick="window.print()">打印 / 存为PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFields() {
+            // 根据类型显示/隐藏特定字段（如有需要可扩展）
+        }
+
+        function generateDoc() {
+            const type = document.getElementById('docType').value;
+            const name = document.getElementById('userName').value || '[您的姓名]';
+            const id = document.getElementById('userId').value || '[身份证号]';
+            const company = document.getElementById('companyName').value || '[公司名称]';
+            const amount = document.getElementById('amount').value || '[金额]';
+            const period = document.getElementById('period').value || '[时间段]';
+            const start = document.getElementById('startDate').value || '[入职日期]';
+            const today = new Date().toLocaleDateString('zh-CN');
+
+            let content = '';
+
+            if (type === 'cuikuan') {
+                content = `【欠薪催款函】
+
+致：${company}
+
+本人（姓名：${name}，身份证号：${id}）于 ${start} 入职贵司/处。
+截至 ${today}，贵司/处 尚未支付本人 ${period} 的工资，共计人民币 ${amount} 元。
+
+根据《中华人民共和国劳动法》及《工资支付暂行规定》，工资应当按月足额支付给劳动者本人。贵司/处 的行为已严重违反法律规定。
+
+现正式函告贵司/处：
+请于收到本函之日起 3 日内，将上述欠薪一次性支付至本人账户。
+否则，本人将依法向劳动监察大队投诉或申请劳动仲裁，并保留解除劳动关系、主张经济补偿金的权利。
+
+特此函告。
+
+催款人：${name}
+日期：${today}`;
+            } else {
+                content = `【劳动仲裁申请书】
+
+申请人：${name}
+身份证号：${id}
+住址：[请补充您的住址]
+联系电话：[请补充您的电话]
+
+被申请人：${company}
+地址：[请补充公司地址]
+法定代表人/负责人：[请补充]
+
+【仲裁请求】
+1. 请求裁决被申请人支付申请人 ${period} 期间的工资共计人民币 ${amount} 元；
+2. 请求裁决被申请人承担本案相关费用。
+
+【事实与理由】
+申请人于 ${start} 入职被申请人处，担任 [职务] 一职。双方存在劳动关系。
+在职期间，申请人正常出勤，但被申请人自 ${period} 起无故拖欠申请人工资。经申请人多次催讨，被申请人仍未支付。
+被申请人的行为严重损害了申请人的合法权益。为维护法律尊严和申请人的合法权益，特依据《中华人民共和国劳动争议调解仲裁法》之规定，向贵委提起仲裁申请，望依法裁决。
+
+此致
+[请填写入当地] 劳动人事争议仲裁委员会
+
+申请人（签字）：_____________
+日期：${today}`;
+            }
+
+            document.getElementById('preview').textContent = content;
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('actionBtns').style.display = 'flex';
+            document.getElementById('resultCard').style.display = 'block';
+            
+            // 滚动到结果区域
+            document.getElementById('resultCard').scrollIntoView({behavior: 'smooth'});
+        }
+
+        function copyDoc() {
+            const text = document.getElementById('preview').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('文书已复制！可粘贴到Word文档中进一步编辑。');
+            });
+        }
+    </script>
+</body>
+</html>
