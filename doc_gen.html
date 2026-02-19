@@ -227,11 +227,11 @@
             <div class="form-group">
                 <label>请选择文书类型 (5种常用类型)</label>
                 <select id="docType" onchange="toggleFields()">
-                    <option value="cuikuan">1. 欠薪催款函 (发给老板)</option>
-                    <option value="zhongcai">2. 劳动仲裁申请书 (通用)</option>
-                    <option value="double_wage">3. 未签劳动合同二倍工资申请</option>
-                    <option value="forced_resign">4. 被迫解除劳动合同通知书 (拿补偿金)</option>
-                    <option value="injury">5. 工伤认定申请书</option>
+                    <option value="cuikuan">欠薪催款函 (发给老板)</option>
+                    <option value="zhongcai">劳动仲裁申请书 (通用)</option>
+                    <option value="double_wage"> 未签劳动合同二倍工资申请</option>
+                    <option value="forced_resign"> 被迫解除劳动合同通知书 (拿补偿金)</option>
+                    <option value="injury">工伤认定申请书</option>
                 </select>
             </div>
 
@@ -297,6 +297,12 @@
                 <input type="text" id="diagnosis" placeholder="例如：右腿骨折">
             </div>
 
+            <!-- 特定字段：提交机构 (仲裁委/人社局) -->
+            <div id="group-agency" class="form-group hidden-group">
+                <label id="agencyLabel">所在区县/市 (提交给哪里)</label>
+                <input type="text" id="agencyRegion" placeholder="例如：朝阳区 (后面会自动加上“劳动人事争议仲裁委员会”)">
+            </div>
+
             <button class="btn" onclick="generateDoc()">生成文书</button>
         </div>
 
@@ -326,6 +332,9 @@
             const injuryGroup = document.getElementById('group-injury');
             const hospitalGroup = document.getElementById('group-hospital');
             const diagnosisGroup = document.getElementById('group-diagnosis');
+            const agencyGroup = document.getElementById('group-agency');
+            const agencyLabel = document.getElementById('agencyLabel');
+            const agencyInput = document.getElementById('agencyRegion');
 
             // 默认全部隐藏
             moneyGroup.style.display = 'none';
@@ -334,22 +343,35 @@
             injuryGroup.style.display = 'none';
             hospitalGroup.style.display = 'none';
             diagnosisGroup.style.display = 'none';
+            agencyGroup.style.display = 'none';
 
             // 根据类型显示
-            if (type === 'cuikuan' || type === 'zhongcai') {
+            if (type === 'cuikuan') {
                 moneyGroup.style.display = 'block';
                 periodGroup.style.display = 'block';
+            } else if (type === 'zhongcai') {
+                moneyGroup.style.display = 'block';
+                periodGroup.style.display = 'block';
+                agencyGroup.style.display = 'block';
+                agencyLabel.textContent = '仲裁委所在区县';
+                agencyInput.placeholder = '例如：朝阳区 (生成后为：朝阳区劳动人事争议仲裁委员会)';
             } else if (type === 'double_wage') {
                 moneyGroup.style.display = 'block'; // 此处复用为二倍工资差额
                 periodGroup.style.display = 'block'; // 未签合同时间段
                 document.querySelector('#group-money label').textContent = '二倍工资差额 (元)';
                 document.querySelector('#group-period label').textContent = '未签合同时间段';
+                agencyGroup.style.display = 'block';
+                agencyLabel.textContent = '仲裁委所在区县';
+                agencyInput.placeholder = '例如：朝阳区 (生成后为：朝阳区劳动人事争议仲裁委员会)';
             } else if (type === 'forced_resign') {
                 resignGroup.style.display = 'block';
             } else if (type === 'injury') {
                 injuryGroup.style.display = 'block';
                 hospitalGroup.style.display = 'block';
                 diagnosisGroup.style.display = 'block';
+                agencyGroup.style.display = 'block';
+                agencyLabel.textContent = '人社局所在区县';
+                agencyInput.placeholder = '例如：朝阳区 (生成后为：朝阳区人力资源和社会保障局)';
             }
             
             // 恢复默认标签
@@ -371,6 +393,10 @@
             const start = document.getElementById('startDate').value || '___';
             const job = document.getElementById('jobTitle').value || '___';
             const today = new Date().toLocaleDateString('zh-CN');
+            
+            // 获取机构地区
+            let agencyRegion = document.getElementById('agencyRegion').value || '___';
+            // 如果用户没有填“区”或“市”，这里不做处理，保留用户原样输入，但在模板中增加后缀
 
             let content = '';
 
@@ -422,7 +448,7 @@
 被申请人的行为严重损害了申请人的合法权益。为维护法律尊严和申请人的合法权益，特依据《中华人民共和国劳动争议调解仲裁法》之规定，向贵委提起仲裁申请，望依法裁决。
 
 此致
-[请填写入当地] 劳动人事争议仲裁委员会
+${agencyRegion}劳动人事争议仲裁委员会
 
 申请人（签字）：_____________
 日期：${today}`;
@@ -452,7 +478,7 @@
 为维护申请人合法权益，特提起仲裁。
 
 此致
-[请填写入当地] 劳动人事争议仲裁委员会
+${agencyRegion}劳动人事争议仲裁委员会
 
 申请人（签字）：_____________
 日期：${today}`;
@@ -503,7 +529,7 @@ ${injuryDate}，申请人在工作时间和工作场所内，因工作原因受�
 根据《工伤保险条例》第十四条的规定，申请人的情形符合认定工伤的条件。特提出申请，请予认定。
 
 此致
-[请填写入当地] 人力资源和社会保障局
+${agencyRegion}人力资源和社会保障局
 
 申请人（签字）：_____________
 日期：${today}`;
