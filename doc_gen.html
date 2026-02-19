@@ -42,6 +42,58 @@
             color: #666;
             font-size: 0.95rem;
         }
+        /* 步骤条样式 */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+        }
+        .step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #cbd5e0;
+            z-index: 0;
+        }
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            background: #cbd5e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            z-index: 1;
+            margin-bottom: 6px;
+        }
+        .step-item.active .step-circle {
+            background: #4a90e2;
+        }
+        .step-item.active::after {
+            background: #4a90e2;
+        }
+        .step-text {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+        .step-item.active .step-text {
+            color: #2c5282;
+            font-weight: bold;
+        }
+
         .card {
             background: white;
             border-radius: 16px;
@@ -113,10 +165,20 @@
             color: #2c5282;
             border: 2px solid #2c5282;
         }
+
+        /* 法律免责声明 */
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #718096;
+            text-align: center;
+            margin-top: 30px;
+            padding: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
         
         /* 打印样式 */
         @media print {
-            header, .card:first-of-type, .action-buttons, .back-button, h2 {
+            header, .card:first-of-type, .action-buttons, .back-button, h2, .steps, .disclaimer {
                 display: none !important;
             }
             .card#resultCard {
@@ -144,6 +206,22 @@
             <h1>智能文书生成</h1>
             <div class="subtitle">填写信息，一键生成标准维权文书</div>
         </header>
+
+        <!-- 步骤条 -->
+        <div class="steps">
+            <div class="step-item active">
+                <div class="step-circle">1</div>
+                <div class="step-text">选择类型</div>
+            </div>
+            <div class="step-item active">
+                <div class="step-circle">2</div>
+                <div class="step-text">填写信息</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <div class="step-text">生成文书</div>
+            </div>
+        </div>
 
         <div class="card">
             <div class="form-group">
@@ -229,6 +307,11 @@
                 <button class="btn" onclick="copyDoc()">复制全文</button>
                 <button class="btn btn-outline" onclick="window.print()">打印 / 存为PDF</button>
             </div>
+        </div>
+        <div class="disclaimer">
+            <p><strong>免责声明：</strong>本工具生成的文书仅供参考，不构成正式法律意见。</p>
+            <p>复杂案件请咨询专业律师或拨打 12348 法律援助热线。</p>
+            <p>本工具所有数据均在本地处理，不上传服务器，请放心使用。</p>
         </div>
     </div>
 
