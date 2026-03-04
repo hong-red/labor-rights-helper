@@ -92,7 +92,7 @@
 
     <div class="container">
         <header>
-            <a href="index.html" class="back-button">← 返回</a>
+            <a id="back-button" class="back-button">← 返回</a>
             <h1>选择您遇到的问题</h1>
         </header>
 
@@ -112,13 +112,23 @@
      const urlParams = new URLSearchParams(window.location.search);
      const type = urlParams.get('type');
  
+     (function setBackLink(){
+         const backEl = document.getElementById('back-button');
+         if (!backEl) return;
+         if (type && type.startsWith('def_')) {
+             backEl.href = 'defendant.html';
+         } else {
+             backEl.href = 'plaintiff.html';
+         }
+     })();
+
      if (!type || !维权数据.identities[type]) {
          document.getElementById('problem-list').innerHTML = `
              <div style="text-align:center; padding:40px; color:red;">
                  <h3>身份类型错误</h3>
                  <p>当前参数：type = ${type || '未传'}</p>
                  <p>支持：gongren / getihu / daxuesheng</p>
-                 <a href="index.html" style="color:#007bff;">← 返回首页重新选择</a>
+                 <a href="plaintiff.html" style="color:#007bff;">← 返回原告流程</a>
              </div>`;
      } else {
          const identity = 维权数据.identities[type];

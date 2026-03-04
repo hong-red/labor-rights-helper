@@ -116,17 +116,21 @@
             或 <strong>12333</strong>（劳动监察）<br>
             农民工欠薪可微信“国务院客户端”小程序提交“根治欠薪”线索
         </div>
+        <div class="disclaimer" style="margin-top:8mm; font-size:11pt; line-height:1.7; border-top:1px solid #ddd; padding-top:6mm;">
+            <strong>免责声明：</strong>本清单依据公开信息整理，仅供参考，不构成法律意见或正式要求。实际办理以有关部门最新规定为准。请如实填写并自行核对材料的真实性与完整性；因使用本清单产生的后果由使用者自行承担。本工具不承担任何直接或间接责任。复杂或重大事项请咨询专业律师或拨打 <strong>12348</strong>。
+        </div>
     </div>
 
     <div class="no-print">
         <button onclick="window.print()">立即打印（建议A4纸）</button>
+        <!-- 已移除“保存为PDF”按钮，统一使用系统打印 -->
     </div>
 
     <script src="js/data.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') || 'nongmingong';
-        const problemKey = urlParams.get('problem') || 'qianxin';
+        const type = urlParams.get('type');
+        const problemKey = urlParams.get('problem');
 
         const identity = 维权数据.identities[type];
         const problem = identity?.problems?.[problemKey];
@@ -134,8 +138,14 @@
         document.getElementById('print-date').textContent = new Date().toLocaleDateString('zh-CN');
 
         if (!identity || !problem) {
-            document.getElementById('print-content').innerHTML = '<p style="text-align:center; color:red;">参数错误，无法生成清单</p>';
+            document.getElementById('print-content').innerHTML = '<p style="text-align:center; color:red;">参数错误，请返回问题页重新选择后再打印。</p>';
+            document.querySelector('.no-print').style.display = 'none';
         } else {
+            renderContent(identity, problem);
+            document.querySelector('.no-print').style.display = 'block';
+        }
+
+        function renderContent(identity, problem) {
             let html = `
                 <h2 style="margin-top:15mm;">问题类型：${identity.label} - ${problem.title}</h2>
 
@@ -181,6 +191,7 @@
 
         // 可选：自动打印（先注释，避免打扰）
         // setTimeout(() => window.print(), 1000);
+
     </script>
 
 </body>

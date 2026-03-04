@@ -201,6 +201,12 @@
             margin: 20px 0;
             font-weight: 500;
         }
+        .hint-note {
+            text-align: center;
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
         footer {
             text-align: center;
             font-size: 0.85rem;
@@ -217,7 +223,7 @@
 <body>
     <div class="container">
         <header>
-            <a href="index.html" class="back-button">← 返回首页</a>
+            <a id="back-button" class="back-button">← 返回</a>
             <h1 id="result-title">加载中...</h1>
         </header>
  
@@ -234,7 +240,7 @@
  
         <footer>
             <!-- 你的原有 footer -->
-            <div class="warning-card">
+            <div class="warning-card" id="warning-card">
                 <strong>农民工欠薪首选：</strong><br>
                 微信搜索“国务院客户端”小程序 → “根治欠薪”专栏提交线索<br>
                 （全国统一、人社部督办，效率最高）
@@ -250,6 +256,16 @@
         const type = params.get('type');
         const problemKey = params.get('problem');
  
+        (function setBackLink(){
+            const backEl = document.getElementById('back-button');
+            if (!backEl) return;
+            if (type && type.startsWith('def_')) {
+                backEl.href = 'defendant.html';
+            } else {
+                backEl.href = 'plaintiff.html';
+            }
+        })();
+
         if (!type || !problemKey || !维权数据.identities[type] || !维权数据.identities[type].problems[problemKey]) {
             document.getElementById('result-content').innerHTML = '<p style="text-align:center;color:red;padding:40px;">参数错误，请返回首页重试</p>';
         } else {
@@ -327,7 +343,7 @@
                 coreHtml += '</ul></div>';
             }
     
-            document.getElementById('result-content').insertAdjacentHTML('beforeend', coreHtml);
+            document.getElementById('result-content').insertAdjacentHTML('beforeend', `<div id="core-content">${coreHtml}</div>`);
     
 
     
@@ -381,18 +397,104 @@
             }
     
             // 添加打印和复制全部按钮
+            const role = (type && type.startsWith('def_')) ? 'defendant' : 'plaintiff';
             document.getElementById('result-content').insertAdjacentHTML('beforeend', `
-                <a href="print.html?type=${type}&problem=${problemKey}" class="action-btn print-btn" target="_blank">
+                <a href="print.html?type=${type}&problem=${problemKey}" class="action-btn print-btn">
                     一键打印证据清单
                 </a>
                 <button class="action-btn copy-all-btn" onclick="copyAll()">
                     复制全部内容分享
                 </button>
+                <a href="doc_gen.html?role=${role}&type=${type}&problem=${problemKey}" class="action-btn" style="background: linear-gradient(135deg, #059669, #10b981);">
+                    智能文书生成
+                </a>
+                <a href="tel:12348" class="action-btn" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
+                    直接拨打 12348 咨询
+                </a>
+                <div class="hint-note">建议：先按本页指引准备证据并初步了解相关法规，再与律师沟通（可前往 <a href="lawyer.html" style="color:#4a90e2;">请律师</a> 页面）。</div>
             `);
     
+            // 根据身份类型调整底部提示
+            (function adjustFooterNote(){
+                const card = document.getElementById('warning-card');
+                if (!card) return;
+                function footerContent(t, p){
+                    if (!t) return '';
+                    if (t === 'gongren') {
+                        if (p === 'qianxin') {
+                            return '<strong>农民工欠薪首选：</strong><br>微信搜索“国务院客户端”小程序 → “根治欠薪”专栏提交线索<br>（全国统一、人社部督办，效率最高）';
+                        } else if (p === 'gongshang') {
+                            return '<strong>工伤认定优先：</strong><br>尽快申请工伤认定与劳动能力鉴定；咨询 12348 / 12333 获取流程与材料清单';
+                        } else {
+                            return '<strong>操作建议：</strong><br>先整理证据目录，再咨询 12348 或 12333，必要时向劳动监察或仲裁申请';
+                        }
+                    }
+                    if (t === 'getihu') {
+                        if (p === 'huokuan') {
+                            return '<strong>货款纠纷建议：</strong><br>先函催款并保全交易凭证；协商不成走诉讼；咨询 12348；市场问题可拨 12315';
+                        } else if (p === 'xiaofei') {
+                            return '<strong>消费维权：</strong><br>优先 12315 投诉并保存合同/凭证/沟通记录；必要时起诉主张赔偿';
+                        } else if (p === 'pingtai') {
+                            return '<strong>平台纠纷：</strong><br>先走平台申诉与举证；无果向 12315 监管投诉；保留扣款与规则证据';
+                        } else {
+                            return '<strong>操作建议：</strong><br>证据先行、书面沟通留痕；12348 法律咨询与 12315 市监投诉并行推进';
+                        }
+                    }
+                    if (t === 'daxuesheng') {
+                        if (p === 'jianzhi') {
+                            return '<strong>兼职报酬：</strong><br>先厘清劳动/劳务性质，选择监察或诉讼；小额纠纷可走小额诉讼，咨询 12348';
+                        } else if (p === 'zhongjie') {
+                            return '<strong>中介/培训贷：</strong><br>保全证据，向 12315 投诉；涉嫌诈骗及时报警；咨询 12348 选择路径';
+                        } else if (p === 'shixi') {
+                            return '<strong>实习纠纷：</strong><br>先联系学校就业中心并留痕；构成劳动关系可向监察/仲裁；咨询 12348';
+                        } else {
+                            return '<strong>操作建议：</strong><br>统一证据标准化，优先咨询 12348 获取路径与材料清单';
+                        }
+                    }
+                    if (t === 'def_accident') {
+                        if (p === 'peichang') {
+                            return '<strong>事故应诉要点：</strong><br>交强险先赔、三者险按保额；联系保险公司理赔；对过高主张申请鉴定';
+                        } else if (p === 'bili') {
+                            return '<strong>责任比例复核：</strong><br>提交更清晰影像与现场材料，及时申请复核或诉讼中重新认定';
+                        } else if (p === 'jupei') {
+                            return '<strong>拒赔异议：</strong><br>审查免赔条款与提示义务；准备完整理赔材料；必要时向银保监投诉';
+                        } else {
+                            return '<strong>事故处理建议：</strong><br>证据留存、层级理赔、合理抗辩；咨询 12348 获取应诉方案';
+                        }
+                    }
+                    if (t === 'def_loan') {
+                        if (p === 'huankuan') {
+                            return '<strong>借贷应诉要点：</strong><br>审查利率上限与诉讼时效；已还款抵扣；协商分期或和解';
+                        } else if (p === 'baozheng') {
+                            return '<strong>担保减责：</strong><br>核对担保效力与范围；主张减责事由；保留追偿与反诉权利';
+                        } else if (p === 'weizuo') {
+                            return '<strong>笔迹鉴定：</strong><br>尽快申请鉴定，准备对比样本；要求出示原件核对，防止涂改';
+                        } else {
+                            return '<strong>应诉建议：</strong><br>证据核对、计算纠正、程序保障；咨询 12348 制定策略';
+                        }
+                    }
+                    if (t === 'def_rent') {
+                        if (p === 'zulin') {
+                            return '<strong>租赁应诉要点：</strong><br>核对合同与履行，证据目录说明；合理分摊费用并争取押金返还';
+                        } else if (p === 'yajin') {
+                            return '<strong>押金返还：</strong><br>验房对比、费用明细；无据扣费可异议；必要时调解或起诉';
+                        } else if (p === 'weixiu') {
+                            return '<strong>维修责任：</strong><br>按约与法律划分大修/小修；书面留痕、票据齐全；协商不成申请调解';
+                        } else if (p === 'qianzu') {
+                            return '<strong>违约金调整：</strong><br>显失公平可适当减少；证明损失并非全部发生；书面沟通留痕';
+                        } else {
+                            return '<strong>应诉建议：</strong><br>证据完整、条款核对、合理抗辩；咨询 12348 获取指引';
+                        }
+                    }
+                    return '<strong>提示：</strong><br>请先整理证据并阅读本页指引，随后拨打 12348 咨询或联系律师完善方案';
+                }
+                const html = footerContent(type, problemKey);
+                card.innerHTML = html;
+                card.style.display = 'block';
+            })();
             // 复制全部内容函数
             function copyAll() {
-                const text = document.getElementById('result-content').innerText;
+                const text = (document.getElementById('core-content') && document.getElementById('core-content').innerText) || '';
                 navigator.clipboard.writeText(text)
                     .then(() => alert('已复制全部内容，可发给朋友/律师'))
                     .catch(() => alert('复制失败，请手动复制'));

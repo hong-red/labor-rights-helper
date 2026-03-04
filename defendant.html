@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>被告流程 - 应诉方入口</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4ff 0%, #e3e9ff 100%);
+            min-height: 100vh;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 28px 16px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 24px;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #6d28d9;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #4c1d95;
+            font-weight: 600;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 28px 0 40px;
+        }
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 26px 22px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.2);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .button:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(30, 64, 175, 0.3); }
+        .button:active { transform: translateY(0); }
+        .button i { font-size: 1.9rem; }
+        .lawyer { background: linear-gradient(135deg, #1e40af, #1e3a8a); box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35); }
+        .gongren { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .getihu  { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+        .daxuesheng { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: #1e40af;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>被告（应诉方）流程</h1>
+            <div class="subtitle">选择你的场景进入下一步</div>
+        </header>
+        <main>
+            <a href="lawyer.html" class="button lawyer">
+                <i class="fas fa-gavel"></i>
+                请律师 / 法律援助
+            </a>
+            <a href="problem.html?type=def_accident" class="button gongren">
+                <i class="fas fa-hard-hat"></i>
+                交通事故应诉
+            </a>
+            <a href="problem.html?type=def_loan" class="button getihu">
+                <i class="fas fa-store"></i>
+                民间借贷/担保应诉
+            </a>
+            <a href="problem.html?type=def_rent" class="button daxuesheng">
+                <i class="fas fa-graduation-cap"></i>
+                租赁/邻里纠纷应诉
+            </a>
+        </main>
+        <a href="index.html" class="back">返回角色分类</a>
+    </div>
+</body>
+</html>

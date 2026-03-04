@@ -105,6 +105,38 @@
             margin-top: 44px;
             line-height: 1.6;
         }
+        .role-picker {
+            margin-top: 8px;
+        }
+        .role-label {
+            font-size: 1rem;
+            color: #1e40af;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            background-color: #ffffff;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e40af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.6c-5%200-9.3%201.8-13.2%206.4-3.9%204.5-6%2010.2-6%2016.3%200%206.1%202.1%2011.8%206%2016.3l118.2%20118.2c4.5%204.5%2010.2%206.4%2016.3%206.4s11.8-1.9%2016.3-6.4l118.2-118.2c3.9-4.5%206-10.2%206-16.3s-2.1-11.8-6-16.3z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+        }
+        select:focus {
+            border-color: #1e40af;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+        }
         @media (max-width: 480px) {
             h1 { font-size: 2.4rem; }
             .button { font-size: 1.35rem; padding: 24px 18px; }
@@ -121,37 +153,17 @@
         </header>
 
         <main>
-            <!-- 请律师放在最前面，用最深蓝突出 -->
-            <a href="lawyer.html" class="button lawyer">
-                <i class="fas fa-gavel"></i>
-                请律师 / 法律援助
+            <a href="plaintiff.html" class="button" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+                <i class="fas fa-hand-fist"></i>
+                我是原告（维权方）
             </a>
-
-            <a href="problem.html?type=gongren" class="button gongren">
-                <i class="fas fa-hard-hat"></i>
-                我是工人（讨薪 / 工伤 / 加班费）
-            </a>
-
-            <a href="problem.html?type=getihu" class="button getihu">
-                <i class="fas fa-store"></i>
-                我是个体商户（货款拖欠 / 消费纠纷）
-            </a>
-
-            <a href="problem.html?type=daxuesheng" class="button daxuesheng">
-                <i class="fas fa-graduation-cap"></i>
-                我是大学生/兼职生（欠薪 / 中介 / 骗局）
-            </a>
-
-            <a href="doc_gen.html" class="button" style="background: linear-gradient(135deg, #059669, #10b981);">
-                <i class="fas fa-file-contract"></i>
-                智能文书生成（催款函/仲裁申请）
-            </a>
-
-            <a href="tel:12348" class="button other">
-                <i class="fas fa-phone-volume"></i>
-                不确定？直接拨12348咨询
+            <a href="defendant.html" class="button" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">
+                <i class="fas fa-shield-halved"></i>
+                我是被告（应诉方）
             </a>
         </main>
+
+        
 
         <footer>
             <p>本工具仅整理公开信息，不构成法律意见</p>
@@ -169,7 +181,7 @@
         // 首次进入友好提示（可选删除）
         if (!localStorage.getItem('seen_home')) {
             setTimeout(() => {
-                alert('本工具收集公开热线和指引，仅供参考。\n实际以12348/12333/12315接听为准。\n祝您顺利维权！');
+                alert('请选择您的角色进入流程：原告或被告。\n本工具收集公开指引，仅供参考。');
                 localStorage.setItem('seen_home', '1');
             }, 800);
         }
