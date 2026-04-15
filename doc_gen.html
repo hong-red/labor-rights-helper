@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>智能文书生成 - 维权助手</title>
+    <title>智能文书生成 - 劳动维权帮助助手</title>
+    <!-- AI辅助生成：Kimi-v2-20250214-1958, 2025-02-14 19:58 -->
+    <!-- 功能：扩展省份选择选项，优化页面UI，实现省份对应的咨询网站显示，添加"请律师"使用说明 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -195,7 +197,7 @@
             <div class="subtitle">填写信息，一键生成标准维权文书</div>
         </header>
 
-        <!-- 步骤条 -->
+
         <div class="steps">
             <div class="step-item active">
                 <div class="step-circle">1</div>
@@ -233,7 +235,7 @@
                 </select>
             </div>
 
-            <!-- 基础信息 (所有类型通用) -->
+
             <div class="form-group">
                 <label>您的姓名</label>
                 <input type="text" id="userName" placeholder="例如：张三">
@@ -255,7 +257,7 @@
                 <input type="text" id="jobTitle" placeholder="例如：操作工、厨师">
             </div>
             
-            <!-- 公司信息 (所有类型通用) -->
+
             <div class="form-group">
                 <label>公司全称 / 老板姓名</label>
                 <input type="text" id="companyName" placeholder="请填写营业执照上的全称">
@@ -347,33 +349,13 @@
         function toggleFields() {
             const type = document.getElementById('docType').value;
             
-            // 获取所有动态字段组
-            const moneyGroup = document.getElementById('group-money');
-            const periodGroup = document.getElementById('group-period');
-            const resignGroup = document.getElementById('group-resign');
-            const injuryGroup = document.getElementById('group-injury');
-            const hospitalGroup = document.getElementById('group-hospital');
-            const diagnosisGroup = document.getElementById('group-diagnosis');
-            const agencyGroup = document.getElementById('group-agency');
-            const agencyLabel = document.getElementById('agencyLabel');
-            const agencyInput = document.getElementById('agencyRegion');
-            const caseGroup = document.getElementById('group-case');
-            const accidentGroup = document.getElementById('group-accident');
-            const insuranceGroup = document.getElementById('group-insurance');
-            const rentGroup = document.getElementById('group-rent');
-
-            // 默认全部隐藏
-            moneyGroup.style.display = 'none';
-            periodGroup.style.display = 'none';
-            resignGroup.style.display = 'none';
-            injuryGroup.style.display = 'none';
-            hospitalGroup.style.display = 'none';
-            diagnosisGroup.style.display = 'none';
-            agencyGroup.style.display = 'none';
-            caseGroup.style.display = 'none';
-            accidentGroup.style.display = 'none';
-            insuranceGroup.style.display = 'none';
-            rentGroup.style.display = 'none';
+            const fieldGroups = ['group-money','group-period','group-resign','group-injury','group-hospital','group-diagnosis','group-agency','group-case','group-accident','group-insurance','group-rent'];
+        fieldGroups.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const agencyLabel = document.getElementById('agencyLabel');
+        const agencyInput = document.getElementById('agencyRegion');
 
             // 根据类型显示
             if (type === 'cuikuan') {
@@ -419,14 +401,14 @@
                 rentGroup.style.display = 'block';
             }
             
-            // 恢复默认标签
+    
             if (type !== 'double_wage') {
                 document.querySelector('#group-money label').textContent = '欠薪金额 (元)';
                 document.querySelector('#group-period label').textContent = '欠薪时间段';
             }
         }
 
-        // 初始化运行一次以设置正确状态
+
         function initByQuery() {
             const params = new URLSearchParams(window.location.search);
             const role = params.get('role') || '';
@@ -474,9 +456,7 @@
             const job = document.getElementById('jobTitle').value || '___';
             const today = new Date().toLocaleDateString('zh-CN');
             
-            // 获取机构地区
-            let agencyRegion = document.getElementById('agencyRegion').value || '___';
-            // 如果用户没有填“区”或“市”，这里不做处理，保留用户原样输入，但在模板中增加后缀
+            const agencyRegion = document.getElementById('agencyRegion').value.trim();
 
             let content = '';
             const caseNo = document.getElementById('caseNo')?.value || '___';
@@ -810,7 +790,7 @@ ${courtName}
             document.getElementById('actionBtns').style.display = 'flex';
             document.getElementById('resultCard').style.display = 'block';
             
-            // 滚动到结果区域
+
             document.getElementById('resultCard').scrollIntoView({behavior: 'smooth'});
         }
 

@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>劳动维权帮助助手</title>
-    
+    <!-- AI辅助生成：Kimi-v2-20250214-1958, 2025-02-14 19:58 -->
+    <!-- 功能：扩展省份选择选项，优化页面UI，实现省份对应的咨询网站显示，添加"请律师"使用说明 -->
     <link rel="stylesheet" href="css/style.css">
     <script type="text/javascript">
         window._AMapSecurityConfig = {
             securityJsCode: 'b644c2876d8163c35f230c3e6e0bf83b'
         }
     </script>
+    <!-- 地图审计号：GS(2022)1063号 -->
     <script src="https://webapi.amap.com/loader.js"></script>
     <style>
         .pagination-container {
@@ -137,7 +139,7 @@
             markers = [];
         }
 
-        // 新增：清除用户位置标记
+
         function clearUserMarker() {
             if (userMarker) {
                 map.remove(userMarker);
@@ -178,13 +180,10 @@
             const provinceSelect = document.getElementById('province-select');
             provinceSelect.innerHTML = ''; // 清空现有选项
 
-            // 添加一个默认的“请选择省份”选项
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.textContent = '请选择省份';
             provinceSelect.appendChild(defaultOption);
-
-            // 从维权数据.provinces中获取所有省份并排序
             const sortedProvinces = Object.keys(维权数据.provinces).sort((a, b) => {
                 return 维权数据.provinces[a].name.localeCompare(维权数据.provinces[b].name, 'zh-CN');
             });
@@ -223,16 +222,13 @@
             const provinceName = provinceData.name;
             currentProvinceSearchPage = page;
 
-            // 1. 先通过 PlaceSearch 搜索该省最权威的“法律援助中心”作为置顶
             const aidSearch = new AMap.PlaceSearch({
-                pageSize: 1,
-                pageIndex: 1,
-                city: provinceName,
-                autoFitView: false // 不自动缩放，留给后面的律师事务所搜索处理
-            });
-
-            // 搜索词：省名 + 法律援助中心
-            const aidQuery = provinceName + '法律援助中心';
+                        pageSize: 1,
+                        pageIndex: 1,
+                        city: provinceName,
+                        autoFitView: false
+                    });
+                    const aidQuery = provinceName + '法律援助中心';
 
             aidSearch.search(aidQuery, (status, result) => {
                 nearbyCentersDiv.innerHTML = ''; // 清空加载提示
@@ -252,7 +248,7 @@
                     `;
                 }
 
-                // 创建置顶模块
+
                 const pinnedDiv = document.createElement('div');
                 pinnedDiv.className = 'legal-aid-pinned';
                 
@@ -274,12 +270,12 @@
                 `;
                 nearbyCentersDiv.appendChild(pinnedDiv);
 
-                // 2. 继续执行原有的“律师事务所”分页搜索
+                
                 searchLawyers(provinceName, page, nearbyCentersDiv);
             });
         }
 
-        // 拆分出搜索律师的函数
+
         function searchLawyers(provinceName, page, container) {
             const placeSearch = new AMap.PlaceSearch({
                 pageSize: 3,
@@ -320,7 +316,7 @@
                         container.innerHTML += `<p>未在${provinceName}找到相关的${searchQuery}。</p>`;
                     }
 
-                    // 翻页控件
+
                     const totalPages = Math.ceil(result.poiList.count / 3);
                     if (totalPages > 1) {
                         const paginationDiv = document.createElement('div');
@@ -369,7 +365,7 @@
             });
         }
 
-        // 新增：显示咨询网站
+
         function displayConsultationWebsite(provinceCode) {
             const websiteDiv = document.getElementById('consultation-website');
             if (websiteDiv) {
@@ -397,9 +393,7 @@
 
                 document.getElementById('get-location-button').disabled = false; // 启用按钮
 
-                // Initial display
-                // 默认不显示任何法律援助中心，等待用户选择省份或点击定位
-                // displayLegalAidCenters();
+
                 displayConsultationWebsite(''); // 初始不显示咨询网站
 
             }).catch(e => {
@@ -408,7 +402,7 @@
             });
         }
 
-        // 新增：搜索附近酒店的函数
+
         function searchNearbyHotels() {
             if (!userLocation) {
                 alert('请先点击“获取我的位置并推荐”以获取您的位置。');
@@ -505,7 +499,7 @@
 
                     currentNearbyAidSearchPage = page;
 
-                    // 使用 AMap.PlaceSearch 搜索附近的法律援助中心
+
                     const placeSearch = new AMap.PlaceSearch({
                         pageSize: 3, // 显示3个结果
                         pageIndex: currentNearbyAidSearchPage,
@@ -526,7 +520,7 @@
                             header.innerHTML = `<strong>您附近 10 公里内的法律援助中心 (第 ${currentNearbyAidSearchPage} 页)</strong>`;
                             panelElement.appendChild(header);
 
-                            // Add results from PlaceSearch
+
                             if (searchResult.poiList && searchResult.poiList.pois.length > 0) {
                                 searchResult.poiList.pois.forEach(poi => {
                                     const poiDiv = document.createElement('div');
@@ -547,13 +541,13 @@
                                 panelElement.innerHTML += '<p>未找到相关法律援助中心。</p>';
                             }
 
-                            // Add pagination controls
+
                             const totalPages = Math.ceil(searchResult.poiList.count / placeSearch.getOptions().pageSize);
                             if (totalPages > 1) {
                                 const paginationDiv = document.createElement('div');
                                 paginationDiv.className = 'pagination-container';
 
-                                // Previous Button
+
                                 const prevButton = document.createElement('button');
                                 prevButton.className = 'page-btn';
                                 prevButton.textContent = '上一页';
@@ -561,7 +555,7 @@
                                 prevButton.onclick = () => getAndShowNearbyAid(currentNearbyAidSearchPage - 1);
                                 paginationDiv.appendChild(prevButton);
 
-                                // Page number buttons
+
                                 const startPage = Math.max(1, currentNearbyAidSearchPage - 2);
                                 const endPage = Math.min(totalPages, startPage + 4);
                                 
@@ -573,7 +567,7 @@
                                     paginationDiv.appendChild(pageButton);
                                 }
 
-                                // Next Button
+
                                 const nextButton = document.createElement('button');
                                 nextButton.className = 'page-btn';
                                 nextButton.textContent = '下一页';
