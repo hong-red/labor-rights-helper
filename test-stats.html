@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试统计功能</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-chart-bar"></i> 统计功能测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 测试API连接</h3>
+            <button onclick="testConnection()">测试连接</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 记录测试点击</h3>
+            <button onclick="recordClick('测试-农民工讨薪', 'problem-selection')">记录农民工讨薪</button>
+            <button onclick="recordClick('测试-大学生兼职', 'problem-selection')">记录大学生兼职</button>
+            <button onclick="recordClick('测试-律师咨询', 'role-selection')">记录律师咨询</button>
+            <div id="record-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 查看统计数据</h3>
+            <button onclick="loadStats()">加载统计数据</button>
+            <div id="stats-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 实时统计展示</h3>
+            <div id="stats-display"></div>
+        </div>
+    </div>
+
+    <script src="js/stats.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        async function testConnection() {
+            const result = document.getElementById('connection-result');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✅ 连接成功: ${JSON.stringify(data, null, 2)}</span>`;
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ 连接失败: ${error.message}</span>`;
+            }
+        }
+
+        async function recordClick(featureName, featureType) {
+            const result = document.getElementById('record-result');
+            try {
+                const response = await fetch(`${API_BASE}/track-click`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ featureName, featureType })
+                });
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✅ 记录成功: ${JSON.stringify(data, null, 2)}</span>`;
+                loadStats(); // 自动刷新统计数据
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ 记录失败: ${error.message}</span>`;
+            }
+        }
+
+        async function loadStats() {
+            const result = document.getElementById('stats-result');
+            const display = document.getElementById('stats-display');
+            
+            try {
+                const [statsResponse, totalResponse] = await Promise.all([
+                    fetch(`${API_BASE}/stats?limit=10`),
+                    fetch(`${API_BASE}/total-clicks`)
+                ]);
+                
+                const statsData = await statsResponse.json();
+                const totalData = await totalResponse.json();
+                
+                result.innerHTML = `<span class="success">✅ 数据加载成功</span>`;
+                
+                // 显示统计数据
+                if (statsData.stats && statsData.stats.length > 0) {
+                    let html = `
+                        <h4>功能使用排行榜</h4>
+                        <p><strong>总点击次数: ${totalData.totalClicks}</strong></p>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <tr style="background: #007bff; color: white;">
+                                <th style="padding: 8px; text-align: left;">排名</th>
+                                <th style="padding: 8px; text-align: left;">功能</th>
+                                <th style="padding: 8px; text-align: center;">点击</th>
+                            </tr>
+                    `;
+                    
+                    statsData.stats.forEach((stat, index) => {
+                        html += `
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px;">${index + 1}</td>
+                                <td style="padding: 8px;">${stat.feature_name}</td>
+                                <td style="padding: 8px; text-align: center; font-weight: bold;">${stat.click_count}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += '</table>';
+                    display.innerHTML = html;
+                } else {
+                    display.innerHTML = '<p>暂无数据，请先点击上面的按钮记录一些数据</p>';
+                }
+                
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ 加载失败: ${error.message}</span>`;
+                display.innerHTML = '<p>无法加载统计数据</p>';
+            }
+        }
+
+        // 页面加载时自动测试连接和加载数据
+        document.addEventListener('DOMContentLoaded', function() {
+            testConnection();
+            loadStats();
+            
+            // 每10秒自动刷新数据
+            setInterval(loadStats, 10000);
+        });
+    </script>
+</body>
+</html>
