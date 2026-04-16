@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>功能使用统计 - 维权助手</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(to bottom, #f0f4ff 0%, #e3e9ff 100%);
+            min-height: 100vh;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0 30px;
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.1);
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+        }
+        .stats-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.1);
+            margin-bottom: 30px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .refresh-btn:hover {
+            background: #1e3a8a;
+            transform: scale(1.1);
+        }
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .filter-section label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .filter-section select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .stats-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-bar"></i> 功能使用统计</h1>
+            <p class="subtitle">实时查看各项功能的使用情况</p>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回首页
+            </a>
+        </header>
+
+        <div class="stats-container">
+            <div class="filter-section">
+                <label for="type-filter">功能类型：</label>
+                <select id="type-filter">
+                    <option value="">全部类型</option>
+                    <option value="navigation">导航</option>
+                    <option value="role-selection">角色选择</option>
+                    <option value="problem-selection">问题选择</option>
+                    <option value="solution">解决方案</option>
+                    <option value="document">文档生成</option>
+                </select>
+                
+                <label for="limit-filter" style="margin-left: 20px;">显示数量：</label>
+                <select id="limit-filter">
+                    <option value="10">前10条</option>
+                    <option value="20">前20条</option>
+                    <option value="50" selected>前50条</option>
+                    <option value="100">前100条</option>
+                    <option value="">全部</option>
+                </select>
+            </div>
+
+            <div id="stats-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载统计数据...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshStats()" title="刷新数据">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script src="js/stats.js"></script>
+    <script>
+        let currentType = '';
+        let currentLimit = 50;
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            
+            // 绑定筛选器事件
+            document.getElementById('type-filter').addEventListener('change', function() {
+                currentType = this.value;
+                loadStats();
+            });
+            
+            document.getElementById('limit-filter').addEventListener('change', function() {
+                currentLimit = this.value;
+                loadStats();
+            });
+        });
+
+        // 加载统计数据
+        async function loadStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载统计数据...</p>
+                </div>
+            `;
+
+            try {
+                const stats = await window.getStats(currentType, currentLimit);
+                const totalClicks = await window.statsTracker.getTotalClicks();
+                
+                if (window.statsTracker.renderStats) {
+                    window.statsTracker.renderStats(stats, totalClicks);
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #e74c3c; padding: 40px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <p>加载统计数据失败，请检查网络连接</p>
+                        <button onclick="loadStats()" style="margin-top: 20px; padding: 10px 20px; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            重试
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // 刷新统计数据
+        function refreshStats() {
+            const btn = document.querySelector('.refresh-btn');
+            const icon = btn.querySelector('i');
+            
+            icon.style.animation = 'spin 1s linear infinite';
+            loadStats().finally(() => {
+                icon.style.animation = '';
+            });
+        }
+
+        // 自动刷新（每30秒）
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                loadStats();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
