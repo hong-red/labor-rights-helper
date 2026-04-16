@@ -1,7 +1,7 @@
 // 统计功能模块
 class StatsTracker {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:3000/api';
+      this.apiBaseUrl = 'http://81.70.191.44:3000/api';
         this.init();
     }
 
