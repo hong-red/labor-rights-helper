@@ -1,4 +1,4 @@
-# 🛡️ 维权助手 - 功能使用统计系统
+# 维权助手 - 功能使用统计系统
 
 一个专为劳动者维权设计的全栈网页应用，提供问题咨询、流程指导和功能使用统计分析。
 
@@ -7,22 +7,22 @@
 ![Express](https://img.shields.io/badge/express-5.x-blue.svg)
 ![SQLite](https://img.shields.io/badge/sqlite-3.x-blue.svg)
 
-## 🌟 功能特性
+## 功能特性
 
-### 📱 前端功能
+### 前端功能
 - **角色选择**: 农民工、大学生、个体户、律师等多角色适配
 - **问题分类**: 欠薪、被骗、合同纠纷等场景化导航
 - **流程指导**: 一步步教你维权流程
 - **实时统计**: 功能使用数据可视化展示
 
-### 📊 后端统计
-- ✅ **功能点击追踪** - 自动记录每个功能的使用次数
-- ✅ **实时排行榜** - 按点击次数从高到低排序
-- ✅ **分类统计** - 按功能类型筛选统计
-- ✅ **数据持久化** - SQLite数据库存储
-- ✅ **RESTful API** - 完整的统计接口
+### 后端统计  
+- **功能点击追踪** - 自动记录每个功能的使用次数
+- **实时排行榜** - 按点击次数从高到低排序
+- **分类统计** - 按功能类型筛选统计
+- **数据持久化** - SQLite数据库存储
+- **RESTful API** - 完整的统计接口
 
-### 🎯 核心API接口
+### 核心API接口
 ```http
 POST /api/track-click     # 记录功能点击
 GET  /api/stats           # 获取统计数据
@@ -31,7 +31,7 @@ GET  /api/total-clicks    # 获取总点击次数
 GET  /api/health          # 健康检查
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 - Node.js ≥ 18.0.0
@@ -64,7 +64,7 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
-## 📁 项目结构
+## 项目结构
 
 ```
 weiquan-helper/
@@ -85,7 +85,7 @@ weiquan-helper/
 └── 📄 README.md              # 项目说明
 ```
 
-## 🎨 界面预览
+##  界面预览
 
 ### 主页面
 ![主页面](https://via.placeholder.com/800x400/1e40af/ffffff?text=维权助手主页面)
@@ -96,7 +96,7 @@ weiquan-helper/
 ### 测试页面
 ![测试页面](https://via.placeholder.com/800x400/ffc107/ffffff?text=统计功能测试)
 
-## 🔧 技术栈
+## 技术栈
 
 ### 前端
 - **HTML5** - 语义化结构
@@ -115,7 +115,7 @@ weiquan-helper/
 - **Nginx** - 反向代理
 - **Let's Encrypt** - SSL证书
 
-## 📊 数据统计示例
+## 数据统计示例
 
 当前数据库中的示例数据：
 ```json
@@ -135,7 +135,7 @@ weiquan-helper/
 ]
 ```
 
-## 🚀 部署选项
+## 部署选项   
 
 ### 本地开发
 ```bash
@@ -153,50 +153,11 @@ docker build -t weiquan-helper .
 docker run -p 3000:3000 weiquan-helper
 ```
 
-## 🔒 安全特性
+## 安全特性
 
 - **输入验证** - 防止SQL注入
 - **CORS配置** - 安全的跨域访问
 - **数据备份** - 自动数据库备份脚本
 - **HTTPS支持** - SSL/TLS加密
 
-## 📈 性能优化
 
-- **数据库索引** - 优化查询性能
-- **缓存策略** - 减少重复计算
-- **压缩传输** - Gzip压缩
-- **CDN支持** - 静态资源加速
-
-## 🤝 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
-## 📄 许可证
-
-本项目采用 [MIT 许可证](LICENSE) 开源。
-
-## 🙋‍♂️ 支持与联系
-
-- **Issues**: [GitHub Issues](https://github.com/your-username/weiquan-helper/issues)
-- **Email**: your-email@example.com
-- **QQ群**: 123456789
-
-## 🙏 致谢
-
-- 感谢所有为劳动者权益保护做出贡献的人们
-- 感谢开源社区提供的优秀工具和框架
-
----
-
-<div align="center">
-  <p><strong>维权助手</strong> - 让每一次维权都有迹可循</p>
-  <p>
-    <a href="https://github.com/your-username/weiquan-helper">⭐ Star</a>
-    ·
-    <a href="https://github.com/your-username/weiquan-helper/fork">🍴 Fork</a>
-  </p>
-</div>
