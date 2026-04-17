@@ -80,24 +80,27 @@
             <div class="subtitle">选择你的身份进入下一步</div>
         </header>
         <main>
-            <a href="lawyer.html" class="button lawyer">
+            <a href="lawyer.html" class="button lawyer" data-track="请律师/法律援助" data-track-type="general">
                 <i class="fas fa-gavel"></i>
                 请律师 / 法律援助
             </a>
-            <a href="problem.html?type=gongren" class="button gongren">
+            <a href="problem.html?type=gongren" class="button gongren" data-track="工人维权" data-track-type="worker">
                 <i class="fas fa-hard-hat"></i>
                 我是工人（讨薪 / 工伤 / 加班费）
             </a>
-            <a href="problem.html?type=getihu" class="button getihu">
+            <a href="problem.html?type=getihu" class="button getihu" data-track="个体商户维权" data-track-type="employee">
                 <i class="fas fa-store"></i>
                 我是个体商户（货款拖欠 / 消费纠纷）
             </a>
-            <a href="problem.html?type=daxuesheng" class="button daxuesheng">
+            <a href="problem.html?type=daxuesheng" class="button daxuesheng" data-track="大学生维权" data-track-type="student">
                 <i class="fas fa-graduation-cap"></i>
                 我是大学生/兼职生（欠薪 / 中介 / 骗局）
             </a>
         </main>
-        <a href="index.html" class="back">返回角色分类</a>
+        <a href="index.html" class="back" data-track="返回角色分类" data-track-type="navigation">返回角色分类</a>
     </div>
+
+    <!-- 加载stats.js，让它自动处理所有统计追踪 -->
+    <script src="js/stats.js"></script>
 </body>
 </html>

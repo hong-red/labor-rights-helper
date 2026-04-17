@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API调试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>API调试页面</h1>
+    
+    <div class="test-section">
+        <h2>当前页面信息</h2>
+        <div id="page-info" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>API连接测试</h2>
+        <button onclick="testPort3000()">测试端口3000</button>
+        <button onclick="testPort4000()">测试端口4000</button>
+        <div id="api-test-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>点击记录测试</h2>
+        <button onclick="testTrackClick3000()">测试端口3000点击记录</button>
+        <button onclick="testTrackClick4000()">测试端口4000点击记录</button>
+        <div id="track-test-result" class="result"></div>
+    </div>
+
+    <script>
+        // 显示当前页面信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const pageInfo = document.getElementById('page-info');
+            pageInfo.innerHTML = `
+                <strong>当前页面URL:</strong> ${window.location.href}<br>
+                <strong>主机名:</strong> ${window.location.hostname}<br>
+                <strong>端口:</strong> ${window.location.port}<br>
+                <strong>协议:</strong> ${window.location.protocol}
+            `;
+        });
+
+        async function testPort3000() {
+            try {
+                const response = await fetch('http://localhost:3000/api/health');
+                const data = await response.json();
+                document.getElementById('api-test-result').innerHTML = 
+                    `<span class="success">✓ 端口3000连接正常:</span> ${JSON.stringify(data)}`;
+            } catch (error) {
+                document.getElementById('api-test-result').innerHTML = 
+                    `<span class="error">✗ 端口3000连接失败:</span> ${error.message}`;
+            }
+        }
+
+        async function testPort4000() {
+            try {
+                const response = await fetch('http://localhost:4000/api/health');
+                const data = await response.json();
+                document.getElementById('api-test-result').innerHTML = 
+                    `<span class="success">✓ 端口4000连接正常:</span> ${JSON.stringify(data)}`;
+            } catch (error) {
+                document.getElementById('api-test-result').innerHTML = 
+                    `<span class="error">✗ 端口4000连接失败:</span> ${error.message}`;
+            }
+        }
+
+        async function testTrackClick3000() {
+            try {
+                const response = await fetch('http://localhost:3000/api/track-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        featureName: '调试测试功能',
+                        featureType: 'debug'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('track-test-result').innerHTML = 
+                    `<span class="success">✓ 端口3000点击记录成功:</span> ${JSON.stringify(data)}`;
+            } catch (error) {
+                document.getElementById('track-test-result').innerHTML = 
+                    `<span class="error">✗ 端口3000点击记录失败:</span> ${error.message}`;
+            }
+        }
+
+        async function testTrackClick4000() {
+            try {
+                const response = await fetch('http://localhost:4000/api/track-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        featureName: '调试测试功能',
+                        featureType: 'debug'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('track-test-result').innerHTML = 
+                    `<span class="success">✓ 端口4000点击记录成功:</span> ${JSON.stringify(data)}`;
+            } catch (error) {
+                document.getElementById('track-test-result').innerHTML = 
+                    `<span class="error">✗ 端口4000点击记录失败:</span> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

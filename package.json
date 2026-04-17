@@ -1,0 +1,45 @@
+{
+  "name": "weiquan-helper",
+  "version": "1.0.0",
+  "description": "劳动维权帮助助手 - 全栈网页应用，提供维权咨询和功能使用统计",
+  "main": "server-4000.js",
+  "scripts": {
+    "start": "node server-4000.js",
+    "dev": "node server-4000.js",
+    "install-deps": "npm install",
+    "deploy": "bash deploy-to-tencent.sh",
+    "docker:build": "docker build -t weiquan-helper .",
+    "docker:run": "docker run -d -p 4000:4000 --name weiquan-helper weiquan-helper",
+    "docker:compose": "docker-compose up -d",
+    "docker:compose:nginx": "docker-compose --profile with-nginx up -d",
+    "pm2:start": "pm2 start server-4000.js --name weiquan-helper",
+    "pm2:stop": "pm2 stop weiquan-helper",
+    "pm2:restart": "pm2 restart weiquan-helper",
+    "pm2:logs": "pm2 logs weiquan-helper",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "维权",
+    "劳动法",
+    "统计",
+    "express",
+    "sqlite",
+    "前端",
+    "腾讯云"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/weiquan-helper.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "sqlite3": "^6.0.1"
+  }
+}

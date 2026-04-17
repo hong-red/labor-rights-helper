@@ -147,5 +147,26 @@
      }
  </script>
 
+    <script src="js/stats.js"></script>
+    <script>
+        // 页面加载时初始化统计追踪
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有问题卡片添加统计追踪
+            const problemCards = document.querySelectorAll('.problem-card');
+            
+            problemCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    const problemTitle = this.querySelector('.problem-title').textContent.trim();
+                    const featureType = 'problem-selection';
+                    
+                    if (window.statsTracker && window.statsTracker.trackFeatureClick) {
+                        window.statsTracker.trackFeatureClick(problemTitle, featureType);
+                    }
+                });
+            });
+            
+            console.log('问题页面统计功能已启用，绑定', problemCards.length, '个问题卡片');
+        });
+    </script>
 </body>
 </html>

@@ -97,7 +97,29 @@
                 租赁/邻里纠纷应诉
             </a>
         </main>
-        <a href="index.html" class="back">返回角色分类</a>
+        <a href="index.html" class="back" data-track="返回角色分类" data-track-type="navigation">返回角色分类</a>
     </div>
+
+    <script src="js/stats.js"></script>
+    <script>
+        // 页面加载时初始化统计追踪
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有按钮添加统计追踪
+            const buttons = document.querySelectorAll('.button');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const buttonText = this.textContent.trim();
+                    const featureType = 'defendant';
+                    
+                    if (window.statsTracker && window.statsTracker.trackFeatureClick) {
+                        window.statsTracker.trackFeatureClick(buttonText, featureType);
+                    }
+                });
+            });
+            
+            console.log('被告页面统计功能已启用，绑定', buttons.length, '个按钮');
+        });
+    </script>
 </body>
 </html>

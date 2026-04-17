@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>功能使用统计 - 维权助手</title>
+    <title>功能使用统计 - 劳动维权帮助助手</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -77,42 +77,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .refresh-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: #1e40af;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.3);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-        .refresh-btn:hover {
-            background: #1e3a8a;
-            transform: scale(1.1);
-        }
-        .filter-section {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .filter-section label {
-            font-weight: 600;
-            margin-right: 10px;
-        }
-        .filter-section select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
+        /* 移除刷新按钮和筛选器样式 */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -129,19 +94,16 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-chart-bar"></i> 功能使用统计</h1>
-            <p class="subtitle">实时查看各项功能的使用情况</p>
+            <h1><i class="fas fa-chart-bar"></i> 劳动维权用户统计</h1>
+        <p class="subtitle">实时统计不同用户群体对维权问题的关注情况</p>
+        <p class="subtitle" style="font-size: 1rem; margin-top: 10px;">
+            <i class="fas fa-info-circle"></i> 专注统计农民工、大学生、职工等群体的维权需求
+        </p>
             <a href="index.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i> 返回首页
+                <i class="fas fa-arrow-left"></i> 返回维权助手首页
             </a>
         </header>
  <div class="stats-container">
-            <div class="filter-section">
-              
-                </select>
-            </div>
-       
-
             <div id="stats-container">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -151,29 +113,11 @@
         </div>
     </div>
 
-    <button class="refresh-btn" onclick="refreshStats()" title="刷新数据">
-        <i class="fas fa-sync-alt"></i>
-    </button>
-
     <script src="js/stats.js"></script>
     <script>
-        let currentType = '';
-        let currentLimit = 50;
-
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
             loadStats();
-            
-            // 绑定筛选器事件
-            document.getElementById('type-filter').addEventListener('change', function() {
-                currentType = this.value;
-                loadStats();
-            });
-            
-            document.getElementById('limit-filter').addEventListener('change', function() {
-                currentLimit = this.value;
-                loadStats();
-            });
         });
 
         // 加载统计数据
@@ -187,7 +131,7 @@
             `;
 
             try {
-                const stats = await window.getStats(currentType, currentLimit);
+                const stats = await window.getStats();
                 const totalClicks = await window.statsTracker.getTotalClicks();
                 
                 if (window.statsTracker.renderStats) {
@@ -198,31 +142,10 @@
                     <div style="text-align: center; color: #e74c3c; padding: 40px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
                         <p>加载统计数据失败，请检查网络连接</p>
-                        <button onclick="loadStats()" style="margin-top: 20px; padding: 10px 20px; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            重试
-                        </button>
                     </div>
                 `;
             }
         }
-
-        // 刷新统计数据
-        function refreshStats() {
-            const btn = document.querySelector('.refresh-btn');
-            const icon = btn.querySelector('i');
-            
-            icon.style.animation = 'spin 1s linear infinite';
-            loadStats().finally(() => {
-                icon.style.animation = '';
-            });
-        }
-
-        // 自动刷新（每30秒）
-        setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                loadStats();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
