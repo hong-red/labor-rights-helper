@@ -4,7 +4,7 @@ console.log('开始启动服务器（端口4000）...');
 try {
     const express = require('./backend/node_modules/express');
     const cors = require('./backend/node_modules/cors');
-    const sqlite3 = require('./backend/node_modules/sqlite3').verbose();
+    const Database = require('./backend/node_modules/better-sqlite3');
     const path = require('path');
     
     console.log('✅ 模块加载成功');
@@ -25,19 +25,17 @@ try {
     app.use(express.static(path.join(__dirname)));
     
     // 创建数据库连接
-    const db = new sqlite3.Database('./backend/stats.db');
+    const db = new Database('./backend/stats.db');
     
     // 创建统计表
-    db.serialize(() => {
-        db.run(`CREATE TABLE IF NOT EXISTS feature_clicks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            feature_name TEXT NOT NULL,
-            feature_type TEXT NOT NULL,
-            click_count INTEGER DEFAULT 1,
-            last_clicked DATETIME DEFAULT CURRENT_TIMESTAMP,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-    });
+    db.exec(`CREATE TABLE IF NOT EXISTS feature_clicks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        feature_name TEXT NOT NULL,
+        feature_type TEXT NOT NULL,
+        click_count INTEGER DEFAULT 1,
+        last_clicked DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
     
     // 健康检查
     app.get('/api/health', (req, res) => {
@@ -53,29 +51,23 @@ try {
             return res.status(400).json({ error: 'featureName and featureType are required' });
         }
 
-        db.get('SELECT * FROM feature_clicks WHERE feature_name = ?', [featureName], (err, row) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-
+        try {
+            // 检查是否已存在
+            const row = db.prepare('SELECT * FROM feature_clicks WHERE feature_name = ?').get(featureName);
+            
             if (row) {
                 // 更新点击次数
-                db.run('UPDATE feature_clicks SET click_count = click_count + 1, last_clicked = CURRENT_TIMESTAMP WHERE feature_name = ?', [featureName], function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: err.message });
-                    }
-                    res.json({ message: 'Click recorded successfully', clickCount: row.click_count + 1 });
-                });
+                const result = db.prepare('UPDATE feature_clicks SET click_count = click_count + 1, last_clicked = CURRENT_TIMESTAMP WHERE feature_name = ?').run(featureName);
+                res.json({ message: 'Click recorded successfully', clickCount: row.click_count + 1 });
             } else {
                 // 插入新记录
-                db.run('INSERT INTO feature_clicks (feature_name, feature_type, click_count) VALUES (?, ?, 1)', [featureName, featureType], function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: err.message });
-                    }
-                    res.json({ message: 'Click recorded successfully', clickCount: 1 });
-                });
+                const result = db.prepare('INSERT INTO feature_clicks (feature_name, feature_type, click_count) VALUES (?, ?, 1)').run(featureName, featureType);
+                res.json({ message: 'Click recorded successfully', clickCount: 1 });
             }
-        });
+        } catch (err) {
+            console.error('记录点击失败:', err);
+            res.status(500).json({ error: err.message });
+        }
     });
 
     // 获取统计数据
@@ -101,22 +93,24 @@ try {
             params.push(parseInt(limit));
         }
 
-        db.all(query, params, (err, rows) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
+        try {
+            const rows = db.prepare(query).all(...params);
             res.json({ stats: rows });
-        });
+        } catch (err) {
+            console.error('获取统计数据失败:', err);
+            res.status(500).json({ error: err.message });
+        }
     });
 
     // 获取总点击次数
     app.get('/api/total-clicks', (req, res) => {
-        db.get('SELECT SUM(click_count) as total FROM feature_clicks', (err, row) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
+        try {
+            const row = db.prepare('SELECT SUM(click_count) as total FROM feature_clicks').get();
             res.json({ totalClicks: row.total || 0 });
-        });
+        } catch (err) {
+            console.error('获取总点击次数失败:', err);
+            res.status(500).json({ error: err.message });
+        }
     });
     
     // 启动服务器

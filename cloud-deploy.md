@@ -46,14 +46,68 @@ git push -u origin main
 
 ### ✅ 第二步：部署后端到腾讯云 (81.70.191.44)
 
-#### 方法一：使用部署脚本（推荐）
+#### 方法一：宝塔面板部署（推荐）
 
+如果你的服务器安装了宝塔面板，这是最简单的方法：
+
+##### 1. 登录宝塔面板
+- 访问：`http://81.70.191.44:8888`
+- 使用宝塔账号密码登录
+
+##### 2. 进入宝塔终端
+- 宝塔面板 → **终端** → 打开命令行
+
+##### 3. 克隆项目并部署
+
+```bash
+# 进入网站目录
+cd /www/wwwroot
+
+# 克隆项目
+git clone https://github.com/hong-red/labor-rights-helper.git
+
+# 进入项目目录
+cd labor-rights-helper
+
+# 运行宝塔专用部署脚本
+node deploy-bt.js
+```
+
+##### 4. 放行端口
+- 宝塔面板 → **安全** → 放行端口 `4000`
+
+##### 5. 验证部署
+```bash
+curl http://localhost:4000/api/health
+```
+
+---
+
+#### 方法二：使用SSH部署脚本
+
+适用于：有SSH密码，直接部署到腾讯云服务器
+
+**Windows PowerShell:**
+```powershell
+# 在项目根目录执行
+.\deploy-backend.ps1
+```
+
+**Git Bash / Linux / Mac:**
 ```bash
 # 在项目根目录执行
 ./deploy-backend.sh
 ```
 
-#### 方法二：手动部署
+**Node.js (跨平台):**
+```bash
+# 在项目根目录执行
+node deploy.js
+```
+
+⚠️ **注意**: 此方法需要服务器SSH密码，如果不知道密码请使用方法一（宝塔部署）
+
+#### 方法三：手动部署
 
 ```bash
 # 1. 登录腾讯云服务器
