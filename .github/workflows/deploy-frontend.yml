@@ -3,8 +3,6 @@ name: Deploy Frontend to GitHub Pages
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:  # 允许手动触发
 
 permissions:
@@ -28,14 +26,16 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        with:
+          enablement: true
 
       - name: Prepare Frontend Files
         run: |
           # 创建部署目录
           mkdir -p _site
           
-          # 复制所有前端文件
-          cp -r *.html _site/
+          # 复制所有前端文件到_site目录
+          cp -r *.html _site/ 2>/dev/null || true
           cp -r css _site/ 2>/dev/null || true
           cp -r js _site/ 2>/dev/null || true
           cp -r images _site/ 2>/dev/null || true

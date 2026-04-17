@@ -7,7 +7,7 @@
 ![Express](https://img.shields.io/badge/express-5.x-blue.svg)
 ![SQLite](https://img.shields.io/badge/sqlite-3.x-blue.svg)
 
-## 📋 部署架构
+##部署架构
 
 ```
 ┌─────────────────────────────────────┐         ┌─────────────────────────┐
@@ -21,7 +21,7 @@
 - **前端**: GitHub Pages 托管（免费、自动部署）
 - **后端**: 腾讯云服务器 81.70.191.44（API服务）
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 - Node.js ≥ 18.0.0
@@ -30,7 +30,7 @@
 
 ---
 
-## 📦 分离部署指南（推荐）
+##  分离部署指南（推荐）
 
 ### 第一步：部署前端到 GitHub Pages
 
@@ -76,10 +76,10 @@ git push -u origin main
 ```
 
 脚本会自动完成：
-- ✅ 打包后端文件
-- ✅ 上传到腾讯云服务器 (81.70.191.44)
-- ✅ 安装依赖
-- ✅ 使用PM2启动服务
+- 打包后端文件
+- 上传到腾讯云服务器 (81.70.191.44)
+- 安装依赖
+- 使用PM2启动服务
 
 #### 方法B：手动部署
 
@@ -114,7 +114,7 @@ curl http://81.70.191.44:4000/api/health
 
 ---
 
-## 🌐 访问地址
+## 访问地址
 
 部署完成后，您可以通过以下地址访问：
 
@@ -127,7 +127,7 @@ curl http://81.70.191.44:4000/api/health
 
 ---
 
-## 💻 本地开发
+## 本地开发 
 
 ```bash
 # 克隆项目
@@ -147,7 +147,7 @@ node server-4000.js
 
 ---
 
-## 📊 功能特性
+## 功能特性
 
 ### 前端功能
 - **角色选择**: 农民工、大学生、个体户、律师等多角色适配
@@ -173,29 +173,29 @@ GET  /api/health           # 健康检查
 
 ---
 
-## 📁 项目结构
+## 项目结构
 
 ```
 labor-rights-helper/
-├── 📄 index.html              # 主页面
-├── 📄 stats.html              # 统计展示页面
-├── 📄 plaintiff.html          # 角色选择页面
-├──  server-4000.js          # Express服务器
-├── 📄 package.json            # 依赖配置
-├── � backend/                # 后端数据目录
-│   └── 📄 stats.db            # SQLite数据库
-├── 📁 js/                     # 前端JavaScript
-│   └── 📄 stats.js            # 统计追踪模块
-├── 📁 css/                    # 样式文件
-├── 📄 deploy-backend.sh       # 后端部署脚本
-├── � Dockerfile              # Docker配置
-├── 📄 docker-compose.yml      # Docker Compose配置
-└── 📄 README.md               # 项目说明
+├── index.html              # 主页面
+├── stats.html              # 统计展示页面
+├── plaintiff.html          # 角色选择页面
+├── server-4000.js          # Express服务器
+├── package.json            # 依赖配置
+├── backend/                # 后端数据目录
+│   └── stats.db            # SQLite数据库
+├── js/                     # 前端JavaScript
+│   └── stats.js            # 统计追踪模块
+├── css/                    # 样式文件
+├── deploy-backend.sh       # 后端部署脚本
+├── Dockerfile              # Docker配置
+├── docker-compose.yml      # Docker Compose配置
+└── README.md               # 项目说明
 ```
 
 ---
 
-## 🔧 常用命令
+## 常用命令
 
 ### 前端更新
 ```bash
@@ -224,7 +224,7 @@ pm2 logs labor-rights-backend
 
 ---
 
-## 🛠️ 技术栈
+## 技术栈
 
 ### 前端
 - **HTML5** - 语义化结构
@@ -245,7 +245,7 @@ pm2 logs labor-rights-backend
 
 ---
 
-## 🔒 安全配置
+## 安全配置
 
 前端代码已自动识别环境：
 ```javascript
@@ -260,7 +260,7 @@ if (hostname === 'localhost') {
 
 ---
 
-## 📞 技术支持
+## 技术支持
 
 - GitHub Pages文档: https://pages.github.com/
 - 腾讯云文档: https://cloud.tencent.com/document/product
@@ -268,7 +268,7 @@ if (hostname === 'localhost') {
 
 ---
 
-**部署完成！** 🎉
+**部署完成！** 
 
 - 前端地址: https://hong-red.github.io/labor-rights-helper/
 - 后端地址: http://81.70.191.44:4000

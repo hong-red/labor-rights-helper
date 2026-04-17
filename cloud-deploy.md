@@ -13,7 +13,7 @@
 
 ---
 
-## 🚀 部署步骤（先前端后后端）
+## 部署步骤（先前端后后端） 
 
 ### ✅ 第一步：部署前端到 GitHub Pages
 
@@ -291,21 +291,3 @@ chmod 755 /home/ubuntu/labor-rights-helper/backend
 
 ---
 
-## 🌐 访问地址
-
-部署完成后：
-
-| 服务 | 地址 |
-|------|------|
-| 前端页面 | https://hong-red.github.io/labor-rights-helper/ |
-| 后端API | http://81.70.191.44:4000/api |
-| 健康检查 | http://81.70.191.44:4000/api/health |
-
----
-
-## 📞 技术支持
-
-- 腾讯云文档：https://cloud.tencent.com/document/product
-- GitHub Pages：https://pages.github.com/
-- PM2文档：https://pm2.keymetrics.io/
-- Nginx文档：https://nginx.org/en/docs/
