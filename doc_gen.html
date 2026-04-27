@@ -816,9 +816,42 @@ ${courtName}
 
         function copyDoc() {
             const text = document.getElementById('preview').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('文书已复制！可粘贴到Word文档中进一步编辑。');
-            });
+            
+            // 检查是否支持 Clipboard API 且处于安全上下文
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('文书已复制！可粘贴到Word文档中进一步编辑。');
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        
+        // 兼容性复制方案
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('文书已复制！可粘贴到Word文档中进一步编辑。');
+                } else {
+                    alert('复制失败，请手动复制文本内容。');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制文本内容。');
+            }
+            
+            document.body.removeChild(textarea);
         }
     </script>
 </body>
