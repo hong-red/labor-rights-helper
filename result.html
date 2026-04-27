@@ -495,9 +495,38 @@
             // 复制全部内容函数
             function copyAll() {
                 const text = (document.getElementById('core-content') && document.getElementById('core-content').innerText) || '';
-                navigator.clipboard.writeText(text)
-                    .then(() => alert('已复制全部内容，可发给朋友/律师'))
-                    .catch(() => alert('复制失败，请手动复制'));
+                
+                // 检查是否支持 Clipboard API 且处于安全上下文
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text)
+                        .then(() => alert('已复制全部内容，可发给朋友/律师'))
+                        .catch(() => fallbackCopyAll(text));
+                } else {
+                    fallbackCopyAll(text);
+                }
+            }
+            
+            // 兼容性复制方案
+            function fallbackCopyAll(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        alert('已复制全部内容，可发给朋友/律师');
+                    } else {
+                        alert('复制失败，请手动复制');
+                    }
+                } catch (err) {
+                    alert('复制失败，请手动复制');
+                }
+                
+                document.body.removeChild(textarea);
             }
 
 
